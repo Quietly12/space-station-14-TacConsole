@@ -1,0 +1,57 @@
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:ui="clr-namespace:Content.Client._Starlight.Drawing.UI"
+                      Title="{Loc 'drawing-tablet-title'}" Resizable="True"
+                      SetSize="920 780" MinSize="740 500">
+    <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="12">
+        <BoxContainer Orientation="Horizontal" HorizontalExpand="True" VerticalExpand="True" >
+            <ScrollContainer HScrollEnabled="False" SetWidth="330" Margin="0 0 16 0" VerticalExpand="True">
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+                    <BoxContainer Orientation="Horizontal">
+                        <Button Name="DrawTool" Text="{Loc 'drawing-tablet-draw'}" ToggleMode="True" HorizontalExpand="True" />
+                        <Button Name="EraseTool" Text="{Loc 'drawing-tablet-erase'}" ToggleMode="True" HorizontalExpand="True" />
+                    </BoxContainer>
+                    <Button Name="SampleTool" Text="{Loc 'drawing-tablet-sample'}" ToggleMode="True" Margin="0 4 0 0" />
+                    <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                        <Button Name="PixelMode" Text="{Loc 'drawing-tablet-pixel-mode'}" HorizontalExpand="True" />
+                    </BoxContainer>
+                    <PanelContainer StyleClasses="LowDivider" Margin="0 12" />
+                    <Label Text="{Loc 'drawing-tablet-brush-shape'}" StyleClasses="LabelBig" Margin="0 0 0 7" />
+                    <BoxContainer Orientation="Horizontal">
+                        <Button Name="CircleBrush" Text="{Loc 'drawing-tablet-circle'}" ToggleMode="True" HorizontalExpand="True" />
+                        <Button Name="SquareBrush" Text="{Loc 'drawing-tablet-square'}" ToggleMode="True" HorizontalExpand="True" />
+                    </BoxContainer>
+                    <BoxContainer Orientation="Horizontal" Margin="0 12 0 0">
+                        <Label Text="{Loc 'drawing-tablet-size'}" SetWidth="105" />
+                        <Slider Name="SizeSlider" MinValue="1" MaxValue="64" Value="4" HorizontalExpand="True" VerticalAlignment="Center" />
+                        <BoxContainer Name="SizeInput" SetWidth="140" Margin="6 0 0 0" />
+                    </BoxContainer>
+                    <BoxContainer Orientation="Horizontal" Margin="0 4 0 0">
+                        <Label Text="{Loc 'drawing-tablet-opacity'}" SetWidth="105" />
+                        <Slider Name="OpacitySlider" MinValue="1" MaxValue="100" Value="100" HorizontalExpand="True" VerticalAlignment="Center" />
+                        <BoxContainer Name="OpacityInput" SetWidth="90" Margin="6 0 0 0" />
+                    </BoxContainer>
+                    <PanelContainer StyleClasses="LowDivider" Margin="0 12" />
+                    <BoxContainer Orientation="Horizontal" Margin="0 0 0 7">
+                        <Label Text="{Loc 'drawing-tablet-color'}" StyleClasses="LabelBig" HorizontalExpand="True" />
+                        <PanelContainer Name="CurrentColor" MinSize="32 32" SetSize="32 32" ToolTip="{Loc 'drawing-tablet-current-color'}" />
+                    </BoxContainer>
+                    <ColorSelectorSliders Name="ColorPicker" IsAlphaVisible="False" />
+                    <Label Text="{Loc 'drawing-tablet-recent-colors'}" Margin="0 10 0 5" />
+                    <BoxContainer Name="RecentColors" Orientation="Horizontal" SeparationOverride="3" SetHeight="24" />
+                    <Control VerticalExpand="True" MinHeight="12" />
+                    <RichTextLabel Name="Status" Visible="False" Margin="0 0 0 5" />
+                    <BoxContainer Orientation="Horizontal">
+                        <Button Name="UndoButton" Text="{Loc 'drawing-tablet-undo'}" HorizontalExpand="True" />
+                        <Button Name="RedoButton" Text="{Loc 'drawing-tablet-redo'}" HorizontalExpand="True" />
+                    </BoxContainer>
+                    <controls:ConfirmButton Name="ClearButton" Text="{Loc 'drawing-tablet-clear'}" ConfirmationText="{Loc 'drawing-tablet-clear-confirm'}" Margin="0 4 0 0" />
+                    <Button Name="PrintButton" Text="{Loc 'drawing-tablet-print'}" Margin="0 12 0 0" />
+                    <Label Name="PointCount" StyleClasses="LabelSmall" HorizontalAlignment="Center" Margin="0 4 0 0" />
+                </BoxContainer>
+            </ScrollContainer>
+            <ui:DrawingCanvasControl Name="Canvas" HorizontalExpand="True" VerticalExpand="True" />
+        </BoxContainer>
+        <Label Text="{Loc 'drawing-tablet-zoom-hint'}" StyleClasses="LabelSmall" HorizontalAlignment="Center" Margin="0 6 0 0" />
+    </BoxContainer>
+</controls:FancyWindow>

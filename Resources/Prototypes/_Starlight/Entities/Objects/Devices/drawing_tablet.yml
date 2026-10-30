@@ -1,0 +1,71 @@
+- type: entity
+  parent: BaseItem
+  id: DrawingTablet
+  name: drawing tablet
+  description: A portable drawing tablet with a built-in printer. Share your artwork with the station!
+  components:
+  - type: Sprite
+    sprite: DeltaV/Objects/Devices/tablets.rsi
+    layers:
+    - state: aac_tablet
+    - state: aac_screen
+      shader: unshaded
+  - type: Item
+    size: Small
+    inhandVisuals:
+      left:
+      - state: aac-inhand-left
+      - state: aac_screen-inhand-left
+        shader: unshaded
+      right:
+      - state: aac-inhand-right
+      - state: aac_screen-inhand-right
+        shader: unshaded
+  - type: DrawingTablet
+    clearAccess: Captain # Replace with Artist access when that role is available.
+  - type: ActivatableUI
+    singleUser: true
+    key: enum.DrawingTabletUiKey.Key
+  - type: UserInterface
+    interfaces:
+      enum.DrawingTabletUiKey.Key:
+        type: DrawingTabletBoundUserInterface
+
+# The admin variant increases document complexity cap, but retains message and image limits.
+- type: entity
+  parent: DrawingTablet
+  id: DrawingTabletUnlimited
+  suffix: Admeme
+  name: nullspace drawing tablet
+  description: A portable drawing tablet with a built-in printer. This model has vastly increased complexity limits.
+  components:
+  - type: DrawingTablet
+    requiresClearAccess: false
+    # These values override the standard paper/drawing defaults in DrawingTabletSettings.
+    paper: 100
+    paperCapacity: 100
+    maxStrokes: 8000
+    maxPoints: 128000
+    maxRenderWork: 128000000
+
+- type: entity
+  parent: BasePaper
+  id: DrawingTabletPaper
+  name: printed artwork
+  description: A printed copy of a drawing
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/bureaucracy.rsi
+    layers:
+    - state: paper
+    - state: paper
+      map: ["enum.DrawingPrintVisualLayers.Image"]
+      visible: false
+  - type: DrawingPrint
+  - type: ActivatableUI
+    key: enum.DrawingPrintUiKey.Key
+    requiresComplex: false
+  - type: UserInterface
+    interfaces:
+      enum.DrawingPrintUiKey.Key:
+        type: DrawingPrintBoundUserInterface
