@@ -330,6 +330,8 @@ public sealed partial class DrawingTabletWindow : FancyWindow
 
     public void FinishStroke() => Canvas.FinishStroke();
 
+    public byte[] CopyPrintPixels() => Canvas.CopyPixels();
+
     public void RestorePendingStroke(DrawingStroke stroke)
     {
         Canvas.RestorePendingStroke(stroke);

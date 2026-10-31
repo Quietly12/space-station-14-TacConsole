@@ -18,7 +18,7 @@ namespace Content.Server._Starlight.Drawing;
 /// <summary>Handles tablet editing, overheating, paper, and printing on the server.</summary>
 public sealed partial class DrawingTabletSystem : EntitySystem
 {
-    // -NR- Duration buckets cover short editing requests and longer print renders separately.
+    // -NR- Duration buckets cover simulation-thread requests and worker-thread print verification separately.
     private static readonly Histogram _mainThreadDuration = Metrics.CreateHistogram(
         "drawing_tablet_main_thread_duration_seconds",
         "-NR- Time spent handling drawing tablet events and print completion on the simulation thread",
@@ -28,9 +28,9 @@ public sealed partial class DrawingTabletSystem : EntitySystem
             Buckets = Histogram.ExponentialBuckets(0.000_01, 2, 16),
         });
 
-    private static readonly Histogram _renderDuration = Metrics.CreateHistogram(
-        "drawing_tablet_render_duration_seconds",
-        "-NR- Time spent rendering, encoding, and making a thumbnail for a print on a worker thread",
+    private static readonly Histogram _verificationDuration = Metrics.CreateHistogram(
+        "drawing_tablet_print_verification_duration_seconds",
+        "-NR- Time spent validating an uploaded print, checking pixels, and making a thumbnail on a worker thread",
         new HistogramConfiguration
         {
             Buckets = Histogram.ExponentialBuckets(0.000_1, 2, 18),
@@ -41,6 +41,7 @@ public sealed partial class DrawingTabletSystem : EntitySystem
     private readonly IHistogram _actionDuration = _mainThreadDuration.WithLabels("action");
     private readonly IHistogram _documentRequestDuration = _mainThreadDuration.WithLabels("document_request");
     private readonly IHistogram _printCompletionDuration = _mainThreadDuration.WithLabels("print_complete");
+    private readonly IHistogram _printUploadDuration = _mainThreadDuration.WithLabels("print_upload");
     private readonly IHistogram _printViewDuration = _mainThreadDuration.WithLabels("view_print");
 
     [Dependency] private MetaDataSystem _metadata = default!;
@@ -63,6 +64,7 @@ public sealed partial class DrawingTabletSystem : EntitySystem
             subs.Event<BoundUIClosedEvent>(OnClosed);
             subs.Event<DrawingTabletStrokeMessage>(OnStroke);
             subs.Event<DrawingTabletActionMessage>(OnTabletAction);
+            subs.Event<DrawingTabletPrintUploadMessage>(OnPrintUpload);
             subs.Event<DrawingTabletRequestMessage>(OnDocumentRequested);
         });
         Subs.BuiEvents<DrawingPrintComponent>(DrawingPrintUiKey.Key, subs => subs.Event<DrawingPrintRequestMessage>(OnPrintRequested));

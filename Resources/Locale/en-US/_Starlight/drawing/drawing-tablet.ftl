@@ -28,6 +28,7 @@ drawing-tablet-no-paper = Out of paper. Please insert more.
 drawing-tablet-printer-busy = Try again shortly.
 drawing-tablet-printing = Printing…
 drawing-tablet-printed = Printed.
+drawing-tablet-image-rejected = -NR- Print image could not be verified.
 drawing-tablet-paper-loaded = Loaded {$count} sheet(s).
 drawing-tablet-paper-count = Paper: {$count} / {$capacity} sheets.
 drawing-tablet-point-count = Complexity: {$count} / {$limit}

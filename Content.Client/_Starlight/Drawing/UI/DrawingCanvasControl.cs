@@ -93,6 +93,8 @@ public sealed class DrawingCanvasControl : Control
         _dirty = true;
     }
 
+    public byte[] CopyPixels() => (byte[]) _pixels.Clone();
+
     private UIBox2 PaperBounds()
     {
         var scale = MathF.Min(PixelSize.X / (float) DrawingRaster.CanvasWidthPixels, PixelSize.Y / (float) DrawingRaster.CanvasHeightPixels);

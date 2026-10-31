@@ -21,7 +21,7 @@ public sealed partial class DrawingTabletSystem : EntitySystem
     private long _nextArtworkReportNumber;
 
     private sealed record RenderedPrint(byte[] Image, byte[] Thumbnail);
-    private sealed record PrintJob(EntityUid Actor, string ArtistName, int Revision, int Strokes, Task<RenderedPrint> Task);
+    private sealed record PrintJob(EntityUid Actor, string ArtistName, int Revision, int Strokes, Task<RenderedPrint?> Task);
     private readonly Dictionary<EntityUid, PrintJob> _printing = [];
 
     private void OnPrintStartup(EntityUid uid, DrawingPrintComponent comp, ComponentStartup args)
@@ -32,9 +32,22 @@ public sealed partial class DrawingTabletSystem : EntitySystem
     private void OnPrintExamine(EntityUid uid, DrawingPrintComponent comp, ExaminedEvent args)
         => args.PushText(Loc.GetString("drawing-print-report-id", ("id", comp.ReportId)), priority: -100);
 
-    private void BeginPrint(EntityUid uid, DrawingTabletComponent comp, EntityUid actor, Guid requestId)
+    private void OnPrintUpload(EntityUid uid, DrawingTabletComponent comp, DrawingTabletPrintUploadMessage args)
+    {
+        using var timer = _printUploadDuration.NewTimer();
+        if (!CanEdit(uid, comp, args.Actor, args.Revision, args.RequestId))
+            return;
+        BeginPrint(uid, comp, args.Actor, args.RequestId, args.Image);
+    }
+
+    private void BeginPrint(EntityUid uid, DrawingTabletComponent comp, EntityUid actor, Guid requestId, byte[] image)
     {
         _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key, new DrawingTabletAckMessage(comp.Revision, requestId), actor);
+        if (image == null || image.Length is < 1 or > DrawingRaster.ByteCount + 1)
+        {
+            Notice(uid, actor, "drawing-tablet-image-rejected");
+            return;
+        }
         if (comp.Paper <= 0)
         {
             Notice(uid, actor, "drawing-tablet-no-paper");
@@ -47,12 +60,11 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         }
         comp.Paper--;
         comp.NextPrint = _timing.CurTime + TimeSpan.FromSeconds(DrawingTabletSettings.PrintCooldownSeconds);
-        // Snapshots the stroke list while sharing accepted stroke objects that remain unchanged.
-        // The background worker renders those strokes without accessing entities or components.
+        // -NR- The worker checks immutable accepted strokes without accessing entities.
         var strokes = comp.Strokes.ToArray();
-        var task = comp.PrintedImage != null && comp.PrintedThumbnail != null
+        var task = comp.PrintedImage != null && comp.PrintedThumbnail != null && image.AsSpan().SequenceEqual(comp.PrintedImage)
             ? ReturnCachedPrint(comp.PrintedImage, comp.PrintedThumbnail)
-            : Task.Run(() => RenderPrint(strokes));
+            : Task.Run(() => VerifyPrint(strokes, image));
         _printing.Add(uid, new PrintJob(actor, Name(actor), comp.Revision, strokes.Length, task));
         _audio.PlayPvs(comp.PrintSound, uid);
         Notice(uid, actor, "drawing-tablet-printing");
@@ -64,41 +76,18 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         return new RenderedPrint(image, thumbnail);
     }
 
-    private async Task<RenderedPrint> RenderPrint(DrawingStroke[] strokes)
+    private async Task<RenderedPrint?> VerifyPrint(DrawingStroke[] strokes, byte[] image)
     {
         var printStarted = Stopwatch.GetTimestamp();
-        double activeSeconds = 0;
-        using var render = new DrawingRaster.RenderSession();
-        var batchStrokes = 0;
-        var batchWork = 0;
         var activeStarted = Stopwatch.GetTimestamp();
-        foreach (var stroke in strokes)
-        {
-            if (!DrawingRaster.Validate(stroke, out var work))
-                throw new ArgumentException("-NR- Invalid drawing stroke in print job.");
-            if (batchStrokes >= DrawingTabletSettings.PrintBatchStrokeLimit
-                || batchStrokes > 0 && batchWork + work > DrawingTabletSettings.PrintBatchWorkLimit)
-            {
-                activeSeconds += Stopwatch.GetElapsedTime(activeStarted).TotalSeconds;
-                await Task.Delay(DrawingTabletSettings.PrintBatchPauseMilliseconds);
-                batchStrokes = 0;
-                batchWork = 0;
-                activeStarted = Stopwatch.GetTimestamp();
-            }
-            render.Apply(stroke);
-            batchStrokes++;
-            batchWork += work;
-        }
-        var image = DrawingRaster.Encode(render.Pixels);
-        var thumbnail = DrawingRaster.Thumbnail(render.Pixels);
-        activeSeconds += Stopwatch.GetElapsedTime(activeStarted).TotalSeconds;
-        _renderDuration.Observe(activeSeconds);
+        var valid = DrawingPrintVerifier.TryVerify(image, strokes, out var thumbnail);
+        _verificationDuration.Observe(Stopwatch.GetElapsedTime(activeStarted).TotalSeconds);
 
         var remaining = TimeSpan.FromMilliseconds(DrawingTabletSettings.MinimumPrintDurationMilliseconds)
             - Stopwatch.GetElapsedTime(printStarted);
         if (remaining > TimeSpan.Zero)
             await Task.Delay(remaining);
-        return new RenderedPrint(image, thumbnail);
+        return valid ? new RenderedPrint(image, thumbnail) : null;
     }
 
     private void FinishPrintJobs()
@@ -117,13 +106,25 @@ public sealed partial class DrawingTabletSystem : EntitySystem
             if (!job.Task.IsCompletedSuccessfully)
             {
                 comp.Paper = Math.Min(comp.PaperCapacity, comp.Paper + 1);
-                Log.Error($"Drawing tablet render failed: {job.Task.Exception}");
+                if (job.Task.Exception != null)
+                    Log.Error($"Drawing tablet verification failed: {job.Task.Exception}");
+                if (Exists(job.Actor) && _ui.IsUiOpen(uid, DrawingTabletUiKey.Key, job.Actor))
+                    Notice(uid, job.Actor, "drawing-tablet-image-rejected");
                 continue;
             }
             //IsCompletedSuccessfully above guarantees this read cannot block the simulation thread.
 #pragma warning disable RA0004
             var result = job.Task.Result;
 #pragma warning restore RA0004
+            if (result == null)
+            {
+                comp.Paper = Math.Min(comp.PaperCapacity, comp.Paper + 1);
+                _admin.Add(LogType.Action, LogImpact.Low,
+                    $"-NR- {ToPrettyString(job.Actor):actor} submitted an unverifiable drawing tablet print from {ToPrettyString(uid):tablet}, revision {job.Revision}.");
+                if (Exists(job.Actor) && _ui.IsUiOpen(uid, DrawingTabletUiKey.Key, job.Actor))
+                    Notice(uid, job.Actor, "drawing-tablet-image-rejected");
+                continue;
+            }
             if (comp.Revision == job.Revision)
             {
                 comp.PrintedImage = result.Image;

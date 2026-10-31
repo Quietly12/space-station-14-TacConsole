@@ -105,6 +105,8 @@ public sealed class DrawingTabletBoundUserInterface(EntityUid owner, Enum uiKey)
         }, _editTimeout.Token);
         if (_pending.TryPeek(out var stroke))
             SendMessage(new DrawingTabletStrokeMessage(stroke, _revision, _editRequest));
+        else if (_action == DrawingTabletAction.Print && _window != null)
+            SendMessage(new DrawingTabletPrintUploadMessage(DrawingRaster.Encode(_window.CopyPrintPixels()), _revision, _editRequest));
         else if (_action is { } action)
             SendMessage(new DrawingTabletActionMessage(action, _revision, _editRequest));
     }

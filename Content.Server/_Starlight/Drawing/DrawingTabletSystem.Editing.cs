@@ -207,7 +207,8 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         switch (args.Action)
         {
             case DrawingTabletAction.Print:
-                BeginPrint(uid, comp, args.Actor, args.RequestId);
+                _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key, new DrawingTabletAckMessage(comp.Revision, args.RequestId), args.Actor);
+                Notice(uid, args.Actor, "drawing-tablet-image-rejected");
                 return;
             case DrawingTabletAction.Undo when comp.Strokes.Count > 0:
                 comp.Redo.Add(comp.Strokes[^1]);

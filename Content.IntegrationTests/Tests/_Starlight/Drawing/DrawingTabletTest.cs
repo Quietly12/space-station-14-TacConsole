@@ -499,6 +499,40 @@ public sealed class DrawingTabletTest : GameTest
         }
     }
 
+    [Test]
+    public async Task ForgedFullPagePrintRefundsPaper()
+    {
+        EntityUid map = default, tablet = default, user = default;
+        await Server.WaitAssertion(() =>
+        {
+            map = Server.System<SharedMapSystem>().CreateMap(out var mapId);
+            var coordinates = new MapCoordinates(0, 0, mapId);
+            tablet = SEntMan.SpawnEntity("DrawingTablet", coordinates);
+            user = SEntMan.SpawnEntity("MobHuman", coordinates);
+            var ui = Server.System<SharedUserInterfaceSystem>();
+            ui.OpenUi(tablet, DrawingTabletUiKey.Key, user);
+            var comp = SEntMan.GetComponent<DrawingTabletComponent>(tablet);
+            var black = new byte[DrawingRaster.ByteCount];
+            ui.RaiseUiMessage(tablet, DrawingTabletUiKey.Key,
+                new DrawingTabletPrintUploadMessage(DrawingRaster.Encode(black), comp.Revision) { Actor = user });
+            Assert.That(comp.Paper, Is.EqualTo(DrawingTabletSettings.StartingPaperSheets - 1));
+        });
+        var refunded = false;
+        for (var i = 0; i < 100 && !refunded; i++)
+        {
+            await Pair.RunTicksSync(1);
+            await Server.WaitAssertion(() => refunded = SEntMan.GetComponent<DrawingTabletComponent>(tablet).Paper == DrawingTabletSettings.StartingPaperSheets);
+            if (!refunded)
+                await Task.Delay(50);
+        }
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(refunded, Is.True);
+            Assert.That(SEntMan.EntityQuery<DrawingPrintComponent>().Any(), Is.False);
+            SEntMan.DeleteEntity(map);
+        });
+    }
+
     private async Task CheckPaperEditingAndPermanentPrint()
     {
         EntityUid map = default, tablet = default, user = default;
@@ -526,7 +560,8 @@ public sealed class DrawingTabletTest : GameTest
             Action(DrawingTabletAction.Redo);
             Assert.That(comp.Strokes, Has.Count.EqualTo(1));
             Server.System<MetaDataSystem>().SetEntityName(user, "Tablet Artist");
-            Action(DrawingTabletAction.Print);
+            ui.RaiseUiMessage(tablet, DrawingTabletUiKey.Key,
+                new DrawingTabletPrintUploadMessage(DrawingRaster.Encode(DrawingRaster.Render(comp.Strokes)), comp.Revision) { Actor = user });
             Server.System<MetaDataSystem>().SetEntityName(user, "Renamed Artist");
             Assert.That(comp.Paper, Is.EqualTo(DrawingTabletSettings.StartingPaperSheets));
             var revision = comp.Revision;

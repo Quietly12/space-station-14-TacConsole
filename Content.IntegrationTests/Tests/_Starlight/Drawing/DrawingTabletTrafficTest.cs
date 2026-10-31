@@ -5,6 +5,7 @@ using System.IO;
 using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.Shared._Starlight.Drawing;
+using Content.Server._Starlight.Drawing;
 using Robust.Shared.Maths;
 using Robust.Shared.Serialization;
 
@@ -76,6 +77,7 @@ public sealed class DrawingTabletTrafficTest : GameTest
             }
 
             var image = DrawingRaster.Encode(DrawingRaster.Render(strokes));
+            results.Add($"print upload payload={Size(new DrawingTabletPrintUploadMessage(image, strokes.Count))} B");
             using (var batched = new DrawingRaster.RenderSession())
             {
                 foreach (var currentStroke in strokes)
@@ -90,96 +92,77 @@ public sealed class DrawingTabletTrafficTest : GameTest
     }
 
     [Test]
-    public async Task ReportPrintWorkerBatchSpikes()
+    public async Task VerifyUploadedPrintAndMeasureCost()
     {
-        var strokes = CreateTrafficStrokes(DrawingTabletSettings.MaximumDrawingStrokes);
-        var expected = DrawingRaster.Render(strokes);
-        var unpacedTimes = await Task.Run(() =>
+        var brushCases = new List<DrawingStroke>
         {
-            var times = new double[3];
-            for (var trial = 0; trial < times.Length; trial++)
-            {
-                var start = Stopwatch.GetTimestamp();
-                var pixels = DrawingRaster.Render(strokes);
-                DrawingRaster.Encode(pixels);
-                DrawingRaster.Thumbnail(pixels);
-                times[trial] = Stopwatch.GetElapsedTime(start).TotalMilliseconds;
-            }
-            return times;
-        });
-        Array.Sort(unpacedTimes);
-        TestContext.Out.WriteLine($"-NR- Drawing tablet worker unpaced 1000 strokes/32000 points: median burst {unpacedTimes[1]:F2} ms, highest observed {unpacedTimes[2]:F2} ms");
-        var peakSamples = new double[3];
-        var activeSamples = new double[3];
-        var wallSamples = new double[3];
-        var batchCount = 0;
-        for (var trial = 0; trial < peakSamples.Length; trial++)
-        {
-            var measurement = await Task.Run(async () =>
-            {
-                var wallStart = Stopwatch.GetTimestamp();
-                var batches = new List<double>();
-                var batchStrokes = 0;
-                var batchWork = 0;
-                using var render = new DrawingRaster.RenderSession();
-                var batchStart = Stopwatch.GetTimestamp();
-                foreach (var stroke in strokes)
-                {
-                    Assert.That(DrawingRaster.Validate(stroke, out var work), Is.True);
-                    if (batchStrokes >= DrawingTabletSettings.PrintBatchStrokeLimit
-                        || batchStrokes > 0 && batchWork + work > DrawingTabletSettings.PrintBatchWorkLimit)
-                    {
-                        batches.Add(Stopwatch.GetElapsedTime(batchStart).TotalMilliseconds);
-                        await Task.Delay(DrawingTabletSettings.PrintBatchPauseMilliseconds);
-                        batchStrokes = 0;
-                        batchWork = 0;
-                        batchStart = Stopwatch.GetTimestamp();
-                    }
-                    render.Apply(stroke);
-                    batchStrokes++;
-                    batchWork += work;
-                }
-                DrawingRaster.Encode(render.Pixels);
-                DrawingRaster.Thumbnail(render.Pixels);
-                batches.Add(Stopwatch.GetElapsedTime(batchStart).TotalMilliseconds);
-                Assert.That(render.Pixels, Is.EqualTo(expected));
-                var remaining = TimeSpan.FromMilliseconds(DrawingTabletSettings.MinimumPrintDurationMilliseconds)
-                    - Stopwatch.GetElapsedTime(wallStart);
-                if (remaining > TimeSpan.Zero)
-                    await Task.Delay(remaining);
-                return (Count: batches.Count, Peak: batches.Max(), Active: batches.Sum(), Wall: Stopwatch.GetElapsedTime(wallStart).TotalMilliseconds);
-            });
-            batchCount = measurement.Count;
-            peakSamples[trial] = measurement.Peak;
-            activeSamples[trial] = measurement.Active;
-            wallSamples[trial] = measurement.Wall;
-        }
-        Array.Sort(peakSamples);
-        Array.Sort(activeSamples);
-        Array.Sort(wallSamples);
-        TestContext.Out.WriteLine($"-NR- Drawing tablet worker 1000 strokes/32000 points: {batchCount} batches, median peak batch {peakSamples[1]:F2} ms, highest observed batch {peakSamples[2]:F2} ms, median active render time {activeSamples[1]:F2} ms, median print time {wallSamples[1]:F0} ms");
-
-        var dense = new DrawingStroke
-        {
-            Brush = DrawingBrush.Square,
-            Size = 64,
-            Points = Enumerable.Repeat(new Vector2(128, 128), 200).ToList(),
+            new() { Points = [new Vector2(0, 0), new Vector2(254, 329)], Brush = DrawingBrush.Circle, Size = 9, Color = Color.Red, Opacity = 40 },
+            new() { Points = [new Vector2(120, 5), new Vector2(120, 290)], Brush = DrawingBrush.Square, Size = 8, Color = Color.Blue, Opacity = 65 },
+            new() { Points = [new Vector2(0, 0), new Vector2(250, 325)], Brush = DrawingBrush.PixelSquare, Size = 5, Color = Color.Green },
+            new() { Points = [new Vector2(40, 40), new Vector2(100, 90)], Brush = DrawingBrush.Circle, Size = 15, Erase = true, Opacity = 70 },
         };
-        Assert.That(DrawingRaster.Validate(dense, out var denseWork), Is.True);
-        var denseTimes = await Task.Run(() =>
+        foreach (var stroke in brushCases)
+            Assert.That(DrawingRaster.Validate(stroke, out _), Is.True);
+        var brushPixels = DrawingRaster.Render(brushCases);
+        for (var y = 0; y < DrawingRaster.CanvasHeightPixels; y += 3)
+        for (var x = 0; x < DrawingRaster.CanvasWidthPixels; x += 3)
         {
-            var times = new double[3];
-            for (var trial = 0; trial < times.Length; trial++)
+            var expected = DrawingPrintVerifier.Sample(brushCases, x, y);
+            var offset = (y * DrawingRaster.CanvasWidthPixels + x) * 3;
+            Assert.That(expected, Is.EqualTo((brushPixels[offset], brushPixels[offset + 1], brushPixels[offset + 2])));
+        }
+        var strokes = CreateTrafficStrokes(DrawingTabletSettings.MaximumDrawingStrokes);
+        var pixels = DrawingRaster.Render(strokes);
+        var image = DrawingRaster.Encode(pixels);
+        for (var y = 0; y < DrawingRaster.CanvasHeightPixels; y += 11)
+        for (var x = 0; x < DrawingRaster.CanvasWidthPixels; x += 13)
+        {
+            var expected = DrawingPrintVerifier.Sample(strokes, x, y);
+            var offset = (y * DrawingRaster.CanvasWidthPixels + x) * 3;
+            Assert.That(expected, Is.EqualTo((pixels[offset], pixels[offset + 1], pixels[offset + 2])));
+        }
+        Assert.That(DrawingPrintVerifier.TryVerify(image, strokes, out var thumbnail), Is.True);
+        Assert.That(thumbnail, Is.EqualTo(DrawingRaster.Thumbnail(pixels)));
+        var forged = DrawingRaster.Encode(DrawingRaster.Blank());
+        Assert.That(DrawingPrintVerifier.TryVerify(forged, strokes, out _), Is.False);
+
+        var oldTimes = new double[7];
+        var newTimes = new double[7];
+        await Task.Run(() =>
+        {
+            for (var i = 0; i < oldTimes.Length; i++)
             {
-                using var render = new DrawingRaster.RenderSession();
                 var start = Stopwatch.GetTimestamp();
-                render.Apply(dense);
-                times[trial] = Stopwatch.GetElapsedTime(start).TotalMilliseconds;
+                var rendered = DrawingRaster.Render(strokes);
+                DrawingRaster.Encode(rendered);
+                DrawingRaster.Thumbnail(rendered);
+                oldTimes[i] = Stopwatch.GetElapsedTime(start).TotalMilliseconds;
+                start = Stopwatch.GetTimestamp();
+                Assert.That(DrawingPrintVerifier.TryVerify(image, strokes, out _), Is.True);
+                newTimes[i] = Stopwatch.GetElapsedTime(start).TotalMilliseconds;
             }
-            return times;
         });
-        Array.Sort(denseTimes);
-        TestContext.Out.WriteLine($"-NR- Drawing tablet worker dense stroke work={denseWork}: median batch {denseTimes[1]:F2} ms, highest observed {denseTimes[2]:F2} ms");
+        Array.Sort(oldTimes);
+        Array.Sort(newTimes);
+        TestContext.Out.WriteLine($"-NR- Drawing tablet print CPU: full render median {oldTimes[3]:F3} ms, upload verification median {newTimes[3]:F3} ms, ratio {oldTimes[3] / newTimes[3]:F1}x");
+
+        var repeatedPath = new List<Vector2>(32);
+        for (var i = 0; i < 32; i++)
+            repeatedPath.Add(i % 2 == 0 ? new Vector2(0, 0) : new Vector2(254, 329));
+        var dense = new List<DrawingStroke>();
+        for (var i = 0; i < 250; i++)
+            dense.Add(new DrawingStroke { Points = repeatedPath, Brush = DrawingBrush.Circle, Size = 1, Color = Color.Red });
+        Assert.That(dense.Sum(stroke => { Assert.That(DrawingRaster.Validate(stroke, out var work), Is.True); return work; }),
+            Is.LessThanOrEqualTo(DrawingTabletSettings.MaximumDrawingRenderWork));
+        var denseStart = Stopwatch.GetTimestamp();
+        var densePixels = DrawingRaster.Render(dense);
+        var denseImage = DrawingRaster.Encode(densePixels);
+        DrawingRaster.Thumbnail(densePixels);
+        var denseRenderMs = Stopwatch.GetElapsedTime(denseStart).TotalMilliseconds;
+        denseStart = Stopwatch.GetTimestamp();
+        Assert.That(DrawingPrintVerifier.TryVerify(denseImage, dense, out _), Is.True);
+        var denseVerifyMs = Stopwatch.GetElapsedTime(denseStart).TotalMilliseconds;
+        TestContext.Out.WriteLine($"-NR- Drawing tablet dense print CPU: full render {denseRenderMs:F3} ms, upload verification {denseVerifyMs:F3} ms, ratio {denseRenderMs / denseVerifyMs:F1}x");
     }
 
     private static List<DrawingStroke> CreateTrafficStrokes(int count)
