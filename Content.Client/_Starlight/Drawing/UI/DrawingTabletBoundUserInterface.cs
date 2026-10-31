@@ -172,6 +172,24 @@ public sealed class DrawingTabletBoundUserInterface(EntityUid owner, Enum uiKey)
             _document.MaxStrokes, _document.MaxPoints, _document.Overheated, _document.LastAcceptedStroke, _document.MaxRenderWork), history.RequestId));
     }
 
+    private void RejectPendingStrokes(DrawingTabletStrokeRejectedMessage rejected)
+    {
+        if (_synchronizing || !_sending || rejected.RequestId != _editRequest)
+            return;
+        if (_document == null || _pending.Count == 0 || rejected.Revision != _revision)
+        {
+            Synchronize();
+            return;
+        }
+        _pending.Clear();
+        _action = null;
+        _sending = false;
+        _editRequest = Guid.Empty;
+        _editTimeout?.Cancel();
+        _window?.SetDocument(_document);
+        SendNext();
+    }
+
     protected override void ReceiveMessage(BoundUserInterfaceMessage message)
     {
         base.ReceiveMessage(message);
@@ -182,6 +200,9 @@ public sealed class DrawingTabletBoundUserInterface(EntityUid owner, Enum uiKey)
                 break;
             case DrawingTabletHistoryMessage history:
                 ApplyHistory(history);
+                break;
+            case DrawingTabletStrokeRejectedMessage rejected:
+                RejectPendingStrokes(rejected);
                 break;
             case DrawingTabletAckMessage ack:
                 if (_synchronizing || !_sending || ack.RequestId != _editRequest)

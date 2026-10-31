@@ -30,6 +30,12 @@ public static class DrawingTabletSettings
     // Print-job limit is server-wide as it's a background process.
     public const int MaximumSimultaneousPrintJobs = 1;
     public const int PrintCooldownSeconds = 3;
+    // -NR- Maximum strokes and estimated brush work processed before a print worker pauses.
+    public const int PrintBatchStrokeLimit = 32;
+    public const int PrintBatchWorkLimit = 1_000_000;
+    // -NR- Pauses release the worker thread; the minimum duration keeps cached prints paced too.
+    public const int PrintBatchPauseMilliseconds = 50;
+    public const int MinimumPrintDurationMilliseconds = 2_000;
     // How many asyncronous strokes can fill the buffer before the tablet locks up without a server response.
     public const int MaximumPendingClientStrokes = 16;
 }
@@ -126,6 +132,13 @@ public sealed class DrawingTabletActionMessage(DrawingTabletAction action, int r
 
 [Serializable, NetSerializable]
 public sealed class DrawingTabletAckMessage(int revision, Guid requestId = default) : BoundUserInterfaceMessage
+{
+    public readonly Guid RequestId = requestId;
+    public readonly int Revision = revision;
+}
+
+[Serializable, NetSerializable]
+public sealed class DrawingTabletStrokeRejectedMessage(int revision, Guid requestId) : BoundUserInterfaceMessage
 {
     public readonly Guid RequestId = requestId;
     public readonly int Revision = revision;

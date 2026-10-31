@@ -239,6 +239,76 @@ public sealed class DrawingTabletTest : GameTest
         }
     }
 
+    [Test]
+    public async Task LimitRejectionRemovesQueuedStrokesWithoutSnapshot()
+    {
+        EntityUid map = default, tablet = default;
+        var players = Server.ResolveDependency<IPlayerManager>();
+        var session = Pair.Player!;
+        var previous = session.AttachedEntity;
+        try
+        {
+            await Server.WaitAssertion(() =>
+            {
+                map = Server.System<SharedMapSystem>().CreateMap(out var id);
+                var coords = new MapCoordinates(0, 0, id);
+                var actor = SEntMan.SpawnEntity("MobHuman", coords);
+                players.SetAttachedEntity(session, actor);
+                tablet = SEntMan.SpawnEntity("DrawingTablet", coords);
+                SEntMan.GetComponent<DrawingTabletComponent>(tablet).MaxPoints = 1;
+                Server.System<SharedUserInterfaceSystem>().OpenUi(tablet, DrawingTabletUiKey.Key, actor);
+            });
+            await Pair.RunTicksSync(100);
+            DrawingCanvasControl canvas = null!;
+            await Client.WaitAssertion(() =>
+            {
+                var root = Client.ResolveDependency<IUserInterfaceManager>().RootControl;
+                canvas = FindControls<DrawingTabletWindow>(root).Single().FindControl<DrawingCanvasControl>("Canvas");
+                Assert.That(canvas.CanDraw, Is.True);
+            });
+            var first = (Vector2) canvas.PixelSize / 2;
+            await Draw(first);
+            await Pair.RunTicksSync(20);
+            var snapshots = 0;
+            var rejections = 0;
+            await Client.WaitAssertion(() =>
+            {
+                snapshots = Client.System<DrawingRequestDropTestSystem>().Snapshots;
+                rejections = Client.System<DrawingRequestDropTestSystem>().Rejections;
+                Assert.That(canvas.TrySampleColor(first, out var color), Is.True);
+                Assert.That(color, Is.EqualTo(Color.Black));
+            });
+            var second = first + new Vector2(20, 0);
+            var third = first + new Vector2(40, 0);
+            await Draw(second);
+            await Draw(third);
+            await Pair.RunTicksSync(30);
+            await Server.WaitAssertion(() => Assert.That(SEntMan.GetComponent<DrawingTabletComponent>(tablet).Strokes, Has.Count.EqualTo(1)));
+            await Client.WaitAssertion(() =>
+            {
+                Assert.That(Client.System<DrawingRequestDropTestSystem>().Snapshots, Is.EqualTo(snapshots));
+                Assert.That(Client.System<DrawingRequestDropTestSystem>().Rejections, Is.EqualTo(rejections + 1));
+                Assert.That(canvas.TrySampleColor(second, out var secondColor), Is.True);
+                Assert.That(secondColor, Is.EqualTo(Color.White));
+                Assert.That(canvas.TrySampleColor(third, out var thirdColor), Is.True);
+                Assert.That(thirdColor, Is.EqualTo(Color.White));
+                Assert.That(canvas.CanDraw, Is.True);
+            });
+
+            async Task Draw(Vector2 point)
+            {
+                await Client.DoGuiEvent(canvas, new GUIBoundKeyEventArgs(EngineKeyFunctions.UIClick, BoundKeyState.Down,
+                    default, true, point, point));
+                await Client.DoGuiEvent(canvas, new GUIBoundKeyEventArgs(EngineKeyFunctions.UIClick, BoundKeyState.Up,
+                    default, true, point, point));
+            }
+        }
+        finally
+        {
+            await Server.WaitPost(() => { players.SetAttachedEntity(session, previous); if (SEntMan.EntityExists(map)) SEntMan.DeleteEntity(map); });
+        }
+    }
+
     [TestCase(false)]
     [TestCase(true)]
     public async Task PrintedArtworkLoadsStaticTexture(bool dropOpeningRequest)
@@ -385,6 +455,7 @@ public sealed class DrawingTabletTest : GameTest
         public DrawingTabletAckMessage? LastAck;
         public DrawingTabletDocumentMessage? LastDocument;
         public int Snapshots;
+        public int Rejections;
         public int HistoryChanges;
         public override void Initialize() => SubscribeLocalEvent<BoundUserInterfaceMessageAttempt>(OnAttempt);
         private void OnAttempt(BoundUserInterfaceMessageAttempt args)
@@ -406,6 +477,7 @@ public sealed class DrawingTabletTest : GameTest
                 args.Cancel();
             }
             if (args.Message is DrawingTabletHistoryMessage) HistoryChanges++;
+            if (args.Message is DrawingTabletStrokeRejectedMessage) Rejections++;
             if (!DropNext || args.Message is not (DrawingTabletRequestMessage or DrawingPrintRequestMessage))
                 return;
             DropNext = false;
@@ -483,11 +555,15 @@ public sealed class DrawingTabletTest : GameTest
                 new DrawingTabletActionMessage(action, comp.Revision) { Actor = user });
         });
 
+        await Pair.RunTicksSync(1);
+        await Server.WaitAssertion(() => Assert.That(SEntMan.EntityQuery<DrawingPrintComponent>().Any(), Is.False));
         var printed = false;
         for (var i = 0; i < 100 && !printed; i++)
         {
             await Pair.RunTicksSync(1);
             await Server.WaitAssertion(() => printed = SEntMan.EntityQuery<DrawingPrintComponent>().Any());
+            if (!printed)
+                await Task.Delay(50);
         }
         await Server.WaitAssertion(() =>
         {

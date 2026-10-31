@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Shared._Starlight.Drawing;
 using Content.Shared.Database;
+using Prometheus;
 using Robust.Server.GameObjects;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
@@ -47,6 +48,7 @@ public sealed partial class DrawingTabletSystem : EntitySystem
 
     private void OnDocumentRequested(EntityUid uid, DrawingTabletComponent comp, DrawingTabletRequestMessage args)
     {
+        using var timer = _documentRequestDuration.NewTimer();
         if (comp.Editor == args.Actor && (!comp.InitialSnapshotSent
             || _timing.CurTime >= comp.NextSnapshot))
         {
@@ -57,6 +59,7 @@ public sealed partial class DrawingTabletSystem : EntitySystem
 
     private void OnOpened(EntityUid uid, DrawingTabletComponent comp, BoundUIOpenedEvent args)
     {
+        using var timer = _openDuration.NewTimer();
         comp.Editor = args.Actor;
         comp.InitialSnapshotSent = false;
         if (GetBudget(args.Actor) is { } budget && budget.OverheatedUntil > comp.OverheatedUntil)
@@ -88,6 +91,13 @@ public sealed partial class DrawingTabletSystem : EntitySystem
 
     private void Notice(EntityUid uid, EntityUid actor, string key)
         => _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key, new DrawingTabletNoticeMessage(Loc.GetString(key)), actor);
+
+    private void RejectStroke(EntityUid uid, DrawingTabletComponent comp, EntityUid actor, Guid requestId, string noticeKey)
+    {
+        Notice(uid, actor, noticeKey);
+        _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key,
+            new DrawingTabletStrokeRejectedMessage(comp.Revision, requestId), actor);
+    }
 
     /// <summary> Checks a tablet action, spends its request budget, and triggers overheat or resync when needed.</summary>
     private bool CanEdit(EntityUid uid, DrawingTabletComponent comp, EntityUid actor, int revision, Guid requestId)
@@ -154,12 +164,12 @@ public sealed partial class DrawingTabletSystem : EntitySystem
 
     private void OnStroke(EntityUid uid, DrawingTabletComponent comp, DrawingTabletStrokeMessage args)
     {
+        using var timer = _strokeDuration.NewTimer();
         if (!CanEdit(uid, comp, args.Actor, args.Revision, args.RequestId))
             return;
         if (!DrawingRaster.Validate(args.Stroke, out var work))
         {
-            Notice(uid, args.Actor, "drawing-tablet-invalid-stroke");
-            Snapshot(uid, comp, args.RequestId, rejectPending: true);
+            RejectStroke(uid, comp, args.Actor, args.RequestId, "drawing-tablet-invalid-stroke");
             return;
         }
         if (comp.Strokes.Count >= comp.MaxStrokes || comp.TotalPoints + args.Stroke.Points.Count > comp.MaxPoints
@@ -167,8 +177,8 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         {
             var full = DrawingTabletComplexity.Calculate(comp.Strokes.Count, comp.TotalPoints, comp.RenderWork,
                 comp.MaxStrokes, comp.MaxPoints, comp.MaxRenderWork) >= comp.MaxPoints;
-            Notice(uid, args.Actor, full ? "drawing-tablet-full" : "drawing-tablet-stroke-too-large");
-            Snapshot(uid, comp, args.RequestId, rejectPending: true);
+            RejectStroke(uid, comp, args.Actor, args.RequestId,
+                full ? "drawing-tablet-full" : "drawing-tablet-stroke-too-large");
             return;
         }
         comp.Strokes.Add(args.Stroke);
@@ -189,6 +199,7 @@ public sealed partial class DrawingTabletSystem : EntitySystem
 
     private void OnTabletAction(EntityUid uid, DrawingTabletComponent comp, DrawingTabletActionMessage args)
     {
+        using var timer = _actionDuration.NewTimer();
         if (!CanEdit(uid, comp, args.Actor, args.Revision, args.RequestId))
             return;
         var previousRevision = comp.Revision;

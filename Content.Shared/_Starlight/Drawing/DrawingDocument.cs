@@ -228,28 +228,43 @@ public static class DrawingRaster
 
     public static byte[] Render(IEnumerable<DrawingStroke> strokes)
     {
-        var pixels = Blank();
-        // Use a new generation number for each stroke instead of clearing the array between strokes.
-        var coverage = RentCoverage();
-        try
+        using var render = new RenderSession();
+        foreach (var stroke in strokes)
+            render.Apply(stroke);
+        return render.Pixels;
+    }
+
+    /// <summary>-NR- Retains the pixel buffer and per-stroke coverage across a render split into batches.</summary>
+    public sealed class RenderSession : IDisposable
+    {
+        private int[]? _coverage = RentCoverage();
+        private int _generation;
+
+        public byte[] Pixels { get; } = Blank();
+
+        public RenderSession()
         {
-            Array.Clear(coverage, 0, CanvasWidthPixels * CanvasHeightPixels);
-            var generation = 0;
-            foreach (var stroke in strokes)
-            {
-                if (generation == int.MaxValue)
-                {
-                    Array.Clear(coverage, 0, CanvasWidthPixels * CanvasHeightPixels);
-                    generation = 0;
-                }
-                Apply(pixels, stroke, coverage, ++generation);
-            }
+            Array.Clear(_coverage, 0, _coverage.Length);
         }
-        finally
+
+        public void Apply(DrawingStroke stroke)
         {
+            var coverage = _coverage ?? throw new ObjectDisposedException(nameof(RenderSession));
+            if (_generation == int.MaxValue)
+            {
+                Array.Clear(coverage, 0, coverage.Length);
+                _generation = 0;
+            }
+            DrawingRaster.Apply(Pixels, stroke, coverage, ++_generation);
+        }
+
+        public void Dispose()
+        {
+            if (_coverage is not { } coverage)
+                return;
+            _coverage = null;
             ReturnCoverage(coverage);
         }
-        return pixels;
     }
 
     public static byte[] Thumbnail(byte[] pixels)

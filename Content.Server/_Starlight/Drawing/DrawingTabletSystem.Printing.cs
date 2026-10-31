@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Content.Shared.Examine;
 using Content.Shared.Interaction;
 using Content.Shared.Paper;
 using Content.Shared.Stacks;
+using Prometheus;
 
 namespace Content.Server._Starlight.Drawing;
 
@@ -49,14 +51,54 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         // The background worker renders those strokes without accessing entities or components.
         var strokes = comp.Strokes.ToArray();
         var task = comp.PrintedImage != null && comp.PrintedThumbnail != null
-            ? Task.FromResult(new RenderedPrint(comp.PrintedImage, comp.PrintedThumbnail))
-            : Task.Run(() =>
-            {
-                var pixels = DrawingRaster.Render(strokes);
-                return new RenderedPrint(DrawingRaster.Encode(pixels), DrawingRaster.Thumbnail(pixels));
-            });
+            ? ReturnCachedPrint(comp.PrintedImage, comp.PrintedThumbnail)
+            : Task.Run(() => RenderPrint(strokes));
         _printing.Add(uid, new PrintJob(actor, Name(actor), comp.Revision, strokes.Length, task));
+        _audio.PlayPvs(comp.PrintSound, uid);
         Notice(uid, actor, "drawing-tablet-printing");
+    }
+
+    private static async Task<RenderedPrint> ReturnCachedPrint(byte[] image, byte[] thumbnail)
+    {
+        await Task.Delay(DrawingTabletSettings.MinimumPrintDurationMilliseconds);
+        return new RenderedPrint(image, thumbnail);
+    }
+
+    private async Task<RenderedPrint> RenderPrint(DrawingStroke[] strokes)
+    {
+        var printStarted = Stopwatch.GetTimestamp();
+        double activeSeconds = 0;
+        using var render = new DrawingRaster.RenderSession();
+        var batchStrokes = 0;
+        var batchWork = 0;
+        var activeStarted = Stopwatch.GetTimestamp();
+        foreach (var stroke in strokes)
+        {
+            if (!DrawingRaster.Validate(stroke, out var work))
+                throw new ArgumentException("-NR- Invalid drawing stroke in print job.");
+            if (batchStrokes >= DrawingTabletSettings.PrintBatchStrokeLimit
+                || batchStrokes > 0 && batchWork + work > DrawingTabletSettings.PrintBatchWorkLimit)
+            {
+                activeSeconds += Stopwatch.GetElapsedTime(activeStarted).TotalSeconds;
+                await Task.Delay(DrawingTabletSettings.PrintBatchPauseMilliseconds);
+                batchStrokes = 0;
+                batchWork = 0;
+                activeStarted = Stopwatch.GetTimestamp();
+            }
+            render.Apply(stroke);
+            batchStrokes++;
+            batchWork += work;
+        }
+        var image = DrawingRaster.Encode(render.Pixels);
+        var thumbnail = DrawingRaster.Thumbnail(render.Pixels);
+        activeSeconds += Stopwatch.GetElapsedTime(activeStarted).TotalSeconds;
+        _renderDuration.Observe(activeSeconds);
+
+        var remaining = TimeSpan.FromMilliseconds(DrawingTabletSettings.MinimumPrintDurationMilliseconds)
+            - Stopwatch.GetElapsedTime(printStarted);
+        if (remaining > TimeSpan.Zero)
+            await Task.Delay(remaining);
+        return new RenderedPrint(image, thumbnail);
     }
 
     private void FinishPrintJobs()
@@ -65,6 +107,7 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         {
             if (!job.Task.IsCompleted)
                 continue;
+            using var timer = _printCompletionDuration.NewTimer();
             _printing.Remove(uid);
             if (!TryComp<DrawingTabletComponent>(uid, out var comp))
             {
@@ -88,7 +131,6 @@ public sealed partial class DrawingTabletSystem : EntitySystem
             }
             var print = Spawn("DrawingTabletPaper", Transform(uid).Coordinates);
             _metadata.SetEntityDescription(print, Loc.GetString("drawing-print-description", ("artist", job.ArtistName)));
-            _audio.PlayPvs(comp.PrintSound, uid);
             var image = Comp<DrawingPrintComponent>(print);
             image.ArtistName = job.ArtistName;
             image.Image = result.Image;
@@ -135,5 +177,8 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         => args.PushMarkup(Loc.GetString("drawing-tablet-paper-count", ("count", comp.Paper), ("capacity", comp.PaperCapacity)));
 
     private void OnPrintRequested(EntityUid uid, DrawingPrintComponent comp, DrawingPrintRequestMessage args)
-        => _ui.ServerSendUiMessage(uid, DrawingPrintUiKey.Key, new DrawingPrintImageMessage(comp.Image, comp.ArtistName), args.Actor);
+    {
+        using var timer = _printViewDuration.NewTimer();
+        _ui.ServerSendUiMessage(uid, DrawingPrintUiKey.Key, new DrawingPrintImageMessage(comp.Image, comp.ArtistName), args.Actor);
+    }
 }
