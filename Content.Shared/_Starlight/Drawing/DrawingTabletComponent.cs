@@ -100,7 +100,7 @@ public enum DrawingTabletUiKey : byte { Key }
 public enum DrawingTabletAction : byte { Undo, Redo, Clear, Print }
 
 [Serializable, NetSerializable]
-public sealed class DrawingTabletState(List<DrawingStroke> strokes, int revision, bool canRedo, int maxStrokes, int maxPoints = DrawingTabletSettings.MaximumDrawingPoints, bool overheated = false, Guid lastAcceptedStroke = default, int maxRenderWork = DrawingTabletSettings.MaximumDrawingRenderWork) : BoundUserInterfaceState
+public sealed class DrawingTabletState(List<DrawingStroke> strokes, int revision, bool canRedo, int maxStrokes, int maxPoints = DrawingTabletSettings.MaximumDrawingPoints, bool overheated = false, Guid lastAcceptedStroke = default, int maxRenderWork = DrawingTabletSettings.MaximumDrawingRenderWork, bool hasVerifiedPrint = false) : BoundUserInterfaceState
 {
     public readonly List<DrawingStroke> Strokes = strokes;
     public readonly int Revision = revision;
@@ -110,6 +110,7 @@ public sealed class DrawingTabletState(List<DrawingStroke> strokes, int revision
     public readonly int MaxRenderWork = maxRenderWork;
     public readonly bool Overheated = overheated;
     public readonly Guid LastAcceptedStroke = lastAcceptedStroke;
+    public readonly bool HasVerifiedPrint = hasVerifiedPrint;
 }
 
 [Serializable, NetSerializable]
@@ -134,6 +135,18 @@ public sealed class DrawingTabletPrintUploadMessage(byte[] image, int revision, 
     public readonly byte[] Image = image;
     public readonly int Revision = revision;
     public readonly Guid RequestId = requestId;
+}
+
+[Serializable, NetSerializable]
+public sealed class DrawingTabletPrintUploadNeededMessage(Guid requestId) : BoundUserInterfaceMessage
+{
+    public readonly Guid RequestId = requestId;
+}
+
+[Serializable, NetSerializable]
+public sealed class DrawingTabletPrintVerifiedMessage(int revision) : BoundUserInterfaceMessage
+{
+    public readonly int Revision = revision;
 }
 
 [Serializable, NetSerializable]

@@ -19,6 +19,7 @@ public sealed class DrawingTabletBoundUserInterface(EntityUid owner, Enum uiKey)
     private DrawingTabletAction? _action;
     private bool _sending;
     private int _revision;
+    private int _verifiedPrintRevision = -1;
     private DrawingTabletState? _document;
     private bool _synchronizing;
     private int _snapshotAttempts;
@@ -105,6 +106,8 @@ public sealed class DrawingTabletBoundUserInterface(EntityUid owner, Enum uiKey)
         }, _editTimeout.Token);
         if (_pending.TryPeek(out var stroke))
             SendMessage(new DrawingTabletStrokeMessage(stroke, _revision, _editRequest));
+        else if (_action == DrawingTabletAction.Print && _verifiedPrintRevision == _revision)
+            SendMessage(new DrawingTabletActionMessage(DrawingTabletAction.Print, _revision, _editRequest));
         else if (_action == DrawingTabletAction.Print && _window != null)
             SendMessage(new DrawingTabletPrintUploadMessage(DrawingRaster.Encode(_window.CopyPrintPixels()), _revision, _editRequest));
         else if (_action is { } action)
@@ -143,6 +146,7 @@ public sealed class DrawingTabletBoundUserInterface(EntityUid owner, Enum uiKey)
         _snapshotRetry?.Cancel();
         _synchronizing = false;
         _revision = drawing.Revision;
+        _verifiedPrintRevision = drawing.HasVerifiedPrint ? drawing.Revision : -1;
         _document = drawing;
         _window?.SetDocument(drawing);
         foreach (var stroke in _pending)
@@ -171,7 +175,8 @@ public sealed class DrawingTabletBoundUserInterface(EntityUid owner, Enum uiKey)
                 _document.Strokes.Add(history.RestoredStroke!);
         }
         ApplyDocument(new DrawingTabletDocumentMessage(new DrawingTabletState(_document.Strokes, history.Revision, history.CanRedo,
-            _document.MaxStrokes, _document.MaxPoints, _document.Overheated, _document.LastAcceptedStroke, _document.MaxRenderWork), history.RequestId));
+            _document.MaxStrokes, _document.MaxPoints, _document.Overheated, _document.LastAcceptedStroke, _document.MaxRenderWork,
+            !changed && _verifiedPrintRevision == history.Revision), history.RequestId));
     }
 
     private void RejectPendingStrokes(DrawingTabletStrokeRejectedMessage rejected)
@@ -206,6 +211,18 @@ public sealed class DrawingTabletBoundUserInterface(EntityUid owner, Enum uiKey)
             case DrawingTabletStrokeRejectedMessage rejected:
                 RejectPendingStrokes(rejected);
                 break;
+            case DrawingTabletPrintUploadNeededMessage needed:
+                if (!_synchronizing && _sending && _action == DrawingTabletAction.Print && _pending.Count == 0
+                    && needed.RequestId == _editRequest && _window != null)
+                {
+                    _verifiedPrintRevision = -1;
+                    SendMessage(new DrawingTabletPrintUploadMessage(DrawingRaster.Encode(_window.CopyPrintPixels()), _revision, _editRequest));
+                }
+                break;
+            case DrawingTabletPrintVerifiedMessage verified:
+                if (verified.Revision == _revision)
+                    _verifiedPrintRevision = verified.Revision;
+                break;
             case DrawingTabletAckMessage ack:
                 if (_synchronizing || !_sending || ack.RequestId != _editRequest)
                     break;
@@ -220,7 +237,10 @@ public sealed class DrawingTabletBoundUserInterface(EntityUid owner, Enum uiKey)
                 _editRequest = Guid.Empty;
                 _editTimeout?.Cancel();
                 if (strokePending)
+                {
+                    _verifiedPrintRevision = -1;
                     _document.Strokes.Add(_pending.Dequeue());
+                }
                 else
                     _action = null;
                 SendNext();

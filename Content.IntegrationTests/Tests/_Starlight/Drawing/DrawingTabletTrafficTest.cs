@@ -53,6 +53,7 @@ public sealed class DrawingTabletTrafficTest : GameTest
             }
             results.Add($"ack payload={Size(new DrawingTabletAckMessage(1000, Guid.NewGuid()))} B");
             results.Add($"reject payload={Size(new DrawingTabletStrokeRejectedMessage(1000, Guid.NewGuid()))} B");
+            results.Add($"repeat print payload={Size(new DrawingTabletActionMessage(DrawingTabletAction.Print, 1000, Guid.NewGuid()))} B");
 
             foreach (var count in new[] { 100, 1000 })
             {

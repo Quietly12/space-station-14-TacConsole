@@ -40,10 +40,11 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         BeginPrint(uid, comp, args.Actor, args.RequestId, args.Image);
     }
 
-    private void BeginPrint(EntityUid uid, DrawingTabletComponent comp, EntityUid actor, Guid requestId, byte[] image)
+    private void BeginPrint(EntityUid uid, DrawingTabletComponent comp, EntityUid actor, Guid requestId, byte[]? image = null)
     {
         _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key, new DrawingTabletAckMessage(comp.Revision, requestId), actor);
-        if (image == null || image.Length is < 1 or > DrawingRaster.ByteCount + 1)
+        if (image != null && image.Length is < 1 or > DrawingRaster.ByteCount + 1
+            || image == null && (comp.PrintedImage == null || comp.PrintedThumbnail == null))
         {
             Notice(uid, actor, "drawing-tablet-image-rejected");
             return;
@@ -60,12 +61,14 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         }
         comp.Paper--;
         comp.NextPrint = _timing.CurTime + TimeSpan.FromSeconds(DrawingTabletSettings.PrintCooldownSeconds);
-        // -NR- The worker checks immutable accepted strokes without accessing entities.
-        var strokes = comp.Strokes.ToArray();
-        var task = comp.PrintedImage != null && comp.PrintedThumbnail != null && image.AsSpan().SequenceEqual(comp.PrintedImage)
-            ? ReturnCachedPrint(comp.PrintedImage, comp.PrintedThumbnail)
-            : Task.Run(() => VerifyPrint(strokes, image));
-        _printing.Add(uid, new PrintJob(actor, Name(actor), comp.Revision, strokes.Length, task));
+        var cached = comp.PrintedImage != null && comp.PrintedThumbnail != null
+            && (image == null || image.AsSpan().SequenceEqual(comp.PrintedImage));
+        // -NR- Only new uploads copy strokes for worker verification.
+        DrawingStroke[] strokes = cached ? [] : comp.Strokes.ToArray();
+        var task = cached
+            ? ReturnCachedPrint(comp.PrintedImage!, comp.PrintedThumbnail!)
+            : Task.Run(() => VerifyPrint(strokes, image!));
+        _printing.Add(uid, new PrintJob(actor, Name(actor), comp.Revision, comp.Strokes.Count, task));
         _audio.PlayPvs(comp.PrintSound, uid);
         Notice(uid, actor, "drawing-tablet-printing");
     }
@@ -129,6 +132,8 @@ public sealed partial class DrawingTabletSystem : EntitySystem
             {
                 comp.PrintedImage = result.Image;
                 comp.PrintedThumbnail = result.Thumbnail;
+                if (Exists(job.Actor) && _ui.IsUiOpen(uid, DrawingTabletUiKey.Key, job.Actor))
+                    _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key, new DrawingTabletPrintVerifiedMessage(job.Revision), job.Actor);
             }
             var print = Spawn("DrawingTabletPaper", Transform(uid).Coordinates);
             _metadata.SetEntityDescription(print, Loc.GetString("drawing-print-description", ("artist", job.ArtistName)));

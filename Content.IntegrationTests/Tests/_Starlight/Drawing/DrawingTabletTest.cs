@@ -457,6 +457,8 @@ public sealed class DrawingTabletTest : GameTest
         public int Snapshots;
         public int Rejections;
         public int HistoryChanges;
+        public int PrintUploads;
+        public int RepeatPrintActions;
         public override void Initialize() => SubscribeLocalEvent<BoundUserInterfaceMessageAttempt>(OnAttempt);
         private void OnAttempt(BoundUserInterfaceMessageAttempt args)
         {
@@ -478,6 +480,8 @@ public sealed class DrawingTabletTest : GameTest
             }
             if (args.Message is DrawingTabletHistoryMessage) HistoryChanges++;
             if (args.Message is DrawingTabletStrokeRejectedMessage) Rejections++;
+            if (args.Message is DrawingTabletPrintUploadMessage) PrintUploads++;
+            if (args.Message is DrawingTabletActionMessage { Action: DrawingTabletAction.Print }) RepeatPrintActions++;
             if (!DropNext || args.Message is not (DrawingTabletRequestMessage or DrawingPrintRequestMessage))
                 return;
             DropNext = false;
@@ -533,6 +537,156 @@ public sealed class DrawingTabletTest : GameTest
         });
     }
 
+    [Test]
+    public async Task RepeatPrintReusesVerifiedImage()
+    {
+        EntityUid map = default, tablet = default, user = default;
+        await Server.WaitAssertion(() =>
+        {
+            map = Server.System<SharedMapSystem>().CreateMap(out var mapId);
+            var coordinates = new MapCoordinates(0, 0, mapId);
+            tablet = SEntMan.SpawnEntity("DrawingTablet", coordinates);
+            user = SEntMan.SpawnEntity("MobHuman", coordinates);
+            var ui = Server.System<SharedUserInterfaceSystem>();
+            ui.OpenUi(tablet, DrawingTabletUiKey.Key, user);
+            var comp = SEntMan.GetComponent<DrawingTabletComponent>(tablet);
+            ui.RaiseUiMessage(tablet, DrawingTabletUiKey.Key,
+                new DrawingTabletActionMessage(DrawingTabletAction.Print, comp.Revision) { Actor = user });
+            Assert.That(comp.Paper, Is.EqualTo(DrawingTabletSettings.StartingPaperSheets));
+            ui.RaiseUiMessage(tablet, DrawingTabletUiKey.Key,
+                new DrawingTabletPrintUploadMessage(DrawingRaster.Encode(DrawingRaster.Blank()), comp.Revision) { Actor = user });
+        });
+        await WaitForPrintCount(1);
+        await Pair.RunSeconds(3.1f);
+        await Server.WaitAssertion(() =>
+        {
+            var comp = SEntMan.GetComponent<DrawingTabletComponent>(tablet);
+            Assert.That(comp.PrintedImage, Is.Not.Null);
+            Assert.That(comp.Paper, Is.EqualTo(DrawingTabletSettings.StartingPaperSheets - 1));
+            Server.System<SharedUserInterfaceSystem>().RaiseUiMessage(tablet, DrawingTabletUiKey.Key,
+                new DrawingTabletActionMessage(DrawingTabletAction.Print, comp.Revision) { Actor = user });
+            Assert.That(comp.Paper, Is.EqualTo(DrawingTabletSettings.StartingPaperSheets - 2));
+        });
+        await WaitForPrintCount(2);
+        await Server.WaitAssertion(() =>
+        {
+            var prints = SEntMan.EntityQuery<DrawingPrintComponent>().ToArray();
+            var comp = SEntMan.GetComponent<DrawingTabletComponent>(tablet);
+            Assert.That(prints, Has.Length.EqualTo(2));
+            Assert.That(ReferenceEquals(prints[0].Image, prints[1].Image), Is.True);
+            Assert.That(ReferenceEquals(prints[1].Image, comp.PrintedImage), Is.True);
+            Assert.That(prints[0].ReportId, Is.Not.EqualTo(prints[1].ReportId));
+            SEntMan.DeleteEntity(map);
+        });
+
+        async Task WaitForPrintCount(int count)
+        {
+            var found = false;
+            for (var i = 0; i < 100 && !found; i++)
+            {
+                await Pair.RunTicksSync(1);
+                await Server.WaitAssertion(() => found = SEntMan.EntityQuery<DrawingPrintComponent>().Count() == count);
+                if (!found)
+                    await Task.Delay(50);
+            }
+            Assert.That(found, Is.True);
+        }
+    }
+
+    [Test]
+    public async Task ConnectedEditorUploadsOnceForRepeatPrints()
+    {
+        EntityUid map = default, tablet = default;
+        var players = Server.ResolveDependency<IPlayerManager>();
+        var session = Pair.Player!;
+        var previous = session.AttachedEntity;
+        try
+        {
+            await Server.WaitAssertion(() =>
+            {
+                map = Server.System<SharedMapSystem>().CreateMap(out var mapId);
+                var coordinates = new MapCoordinates(0, 0, mapId);
+                var actor = SEntMan.SpawnEntity("MobHuman", coordinates);
+                players.SetAttachedEntity(session, actor);
+                tablet = SEntMan.SpawnEntity("DrawingTablet", coordinates);
+                var observer = Server.System<DrawingRequestDropTestSystem>();
+                observer.PrintUploads = 0;
+                observer.RepeatPrintActions = 0;
+                Server.System<SharedUserInterfaceSystem>().OpenUi(tablet, DrawingTabletUiKey.Key, actor);
+            });
+            await Pair.RunTicksSync(100);
+            await ClickPrint();
+            await WaitForPrintCount(1);
+            await Pair.RunSeconds(3.1f);
+            await ClickPrint();
+            await Pair.RunTicksSync(20);
+            await Server.WaitAssertion(() =>
+            {
+                var observer = Server.System<DrawingRequestDropTestSystem>();
+                Assert.That(observer.PrintUploads, Is.EqualTo(1));
+                Assert.That(observer.RepeatPrintActions, Is.EqualTo(1));
+                Assert.That(SEntMan.GetComponent<DrawingTabletComponent>(tablet).Paper,
+                    Is.EqualTo(DrawingTabletSettings.StartingPaperSheets - 2));
+            });
+            await WaitForPrintCount(2);
+            DrawingCanvasControl canvas = null!;
+            await Client.WaitAssertion(() => canvas = FindControls<DrawingTabletWindow>(Client.ResolveDependency<IUserInterfaceManager>().RootControl)
+                .Single().FindControl<DrawingCanvasControl>("Canvas"));
+            var point = (Vector2) canvas.PixelSize / 2;
+            await Client.DoGuiEvent(canvas, new GUIBoundKeyEventArgs(EngineKeyFunctions.UIClick, BoundKeyState.Down, default, true, point, point));
+            await Client.DoGuiEvent(canvas, new GUIBoundKeyEventArgs(EngineKeyFunctions.UIClick, BoundKeyState.Up, default, true, point, point));
+            await Pair.RunTicksSync(20);
+            await Server.WaitAssertion(() => Assert.That(SEntMan.GetComponent<DrawingTabletComponent>(tablet).Strokes, Has.Count.EqualTo(1)));
+            await Pair.RunSeconds(3.1f);
+            await ClickPrint();
+            await Server.WaitAssertion(() =>
+            {
+                var observer = Server.System<DrawingRequestDropTestSystem>();
+                Assert.That(observer.PrintUploads, Is.EqualTo(2));
+                Assert.That(observer.RepeatPrintActions, Is.EqualTo(1));
+            });
+            await WaitForPrintCount(3);
+        }
+        finally
+        {
+            await Server.WaitPost(() =>
+            {
+                players.SetAttachedEntity(session, previous);
+                if (SEntMan.EntityExists(map))
+                    SEntMan.DeleteEntity(map);
+            });
+        }
+
+        async Task ClickPrint()
+        {
+            Button button = null!;
+            await Client.WaitAssertion(() =>
+            {
+                button = FindControls<DrawingTabletWindow>(Client.ResolveDependency<IUserInterfaceManager>().RootControl)
+                    .Single().FindControl<Button>("PrintButton");
+                Assert.That(button.Disabled, Is.False);
+            });
+            var local = (Vector2) button.PixelSize / 2;
+            var screen = new ScreenCoordinates(button.GlobalPixelPosition + local, WindowId.Main);
+            await Client.DoGuiEvent(button, new GUIBoundKeyEventArgs(EngineKeyFunctions.UIClick, BoundKeyState.Down, screen, true, local, local));
+            await Client.DoGuiEvent(button, new GUIBoundKeyEventArgs(EngineKeyFunctions.UIClick, BoundKeyState.Up, screen, true, local, local));
+            await Pair.RunTicksSync(20);
+        }
+
+        async Task WaitForPrintCount(int count)
+        {
+            var found = false;
+            for (var i = 0; i < 100 && !found; i++)
+            {
+                await Pair.RunTicksSync(1);
+                await Server.WaitAssertion(() => found = SEntMan.EntityQuery<DrawingPrintComponent>().Count() == count);
+                if (!found)
+                    await Task.Delay(50);
+            }
+            Assert.That(found, Is.True);
+        }
+    }
+
     private async Task CheckPaperEditingAndPermanentPrint()
     {
         EntityUid map = default, tablet = default, user = default;
@@ -553,12 +707,19 @@ public sealed class DrawingTabletTest : GameTest
             var stroke = new DrawingStroke { Points = [new Vector2(20, 20), new Vector2(80, 80)], Color = Color.Red, Size = 8 };
             ui.RaiseUiMessage(tablet, DrawingTabletUiKey.Key, new DrawingTabletStrokeMessage(stroke, comp.Revision) { Actor = user });
             Assert.That(comp.Strokes, Has.Count.EqualTo(1));
+            Assert.That(DrawingRaster.Validate(stroke, out var work), Is.True);
+            Assert.That(comp.TotalPoints, Is.EqualTo(stroke.Points.Count));
+            Assert.That(comp.RenderWork, Is.EqualTo(work));
             ui.RaiseUiMessage(tablet, DrawingTabletUiKey.Key, new DrawingTabletStrokeMessage(stroke, -1) { Actor = user });
             Assert.That(comp.Strokes, Has.Count.EqualTo(1), " Stale revisions cannot change the drawing.");
             Action(DrawingTabletAction.Undo);
             Assert.That(comp.Strokes, Is.Empty);
+            Assert.That(comp.TotalPoints, Is.Zero);
+            Assert.That(comp.RenderWork, Is.Zero);
             Action(DrawingTabletAction.Redo);
             Assert.That(comp.Strokes, Has.Count.EqualTo(1));
+            Assert.That(comp.TotalPoints, Is.EqualTo(stroke.Points.Count));
+            Assert.That(comp.RenderWork, Is.EqualTo(work));
             Server.System<MetaDataSystem>().SetEntityName(user, "Tablet Artist");
             ui.RaiseUiMessage(tablet, DrawingTabletUiKey.Key,
                 new DrawingTabletPrintUploadMessage(DrawingRaster.Encode(DrawingRaster.Render(comp.Strokes)), comp.Revision) { Actor = user });
@@ -585,6 +746,8 @@ public sealed class DrawingTabletTest : GameTest
             Assert.That(Server.System<SharedHandsSystem>().TryPickupAnyHand(user, captain), Is.True);
             Action(DrawingTabletAction.Clear);
             Assert.That(comp.Strokes, Is.Empty);
+            Assert.That(comp.TotalPoints, Is.Zero);
+            Assert.That(comp.RenderWork, Is.Zero);
 
             void Action(DrawingTabletAction action) => ui.RaiseUiMessage(tablet, DrawingTabletUiKey.Key,
                 new DrawingTabletActionMessage(action, comp.Revision) { Actor = user });

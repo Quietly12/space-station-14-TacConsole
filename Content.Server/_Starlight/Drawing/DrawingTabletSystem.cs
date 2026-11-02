@@ -69,6 +69,7 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         });
         Subs.BuiEvents<DrawingPrintComponent>(DrawingPrintUiKey.Key, subs => subs.Event<DrawingPrintRequestMessage>(OnPrintRequested));
         SubscribeLocalEvent<DrawingPrintComponent, ComponentStartup>(OnPrintStartup);
+        SubscribeLocalEvent<DrawingTabletComponent, ComponentStartup>(OnTabletStartup);
         SubscribeLocalEvent<DrawingPrintComponent, ExaminedEvent>(OnPrintExamine);
         SubscribeLocalEvent<DrawingTabletComponent, InteractUsingEvent>(OnInsertPaper);
         SubscribeLocalEvent<DrawingTabletComponent, ExaminedEvent>(OnExamine);

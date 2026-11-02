@@ -67,7 +67,6 @@ public sealed partial class DrawingTabletSystem : EntitySystem
             comp.OverheatedUntil = budget.OverheatedUntil;
             _hotTablets.Add(uid);
         }
-        Recount(comp);
         if (IsOverheated(comp, args.Actor))
             HeatNotice(uid, comp, args.Actor);
         _admin.Add(LogType.Action, LogImpact.Low, $"{ToPrettyString(args.Actor):actor} opened drawing tablet {ToPrettyString(uid):tablet}");
@@ -86,7 +85,8 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         comp.NextSnapshot = _timing.CurTime + TimeSpan.FromSeconds(MinimumResyncIntervalSeconds);
         if (comp.Editor is { } editor)
             _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key,
-                new DrawingTabletDocumentMessage(new DrawingTabletState(new(comp.Strokes), comp.Revision, comp.Redo.Count > 0, comp.MaxStrokes, comp.MaxPoints, IsOverheated(comp, editor), comp.LastAcceptedStroke, comp.MaxRenderWork), requestId, rejectPending), editor);
+                new DrawingTabletDocumentMessage(new DrawingTabletState(new(comp.Strokes), comp.Revision, comp.Redo.Count > 0, comp.MaxStrokes, comp.MaxPoints, IsOverheated(comp, editor), comp.LastAcceptedStroke, comp.MaxRenderWork,
+                    comp.PrintedImage != null && comp.PrintedThumbnail != null), requestId, rejectPending), editor);
     }
 
     private void Notice(EntityUid uid, EntityUid actor, string key)
@@ -207,18 +207,33 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         switch (args.Action)
         {
             case DrawingTabletAction.Print:
-                _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key, new DrawingTabletAckMessage(comp.Revision, args.RequestId), args.Actor);
-                Notice(uid, args.Actor, "drawing-tablet-image-rejected");
+                if (comp.PrintedImage == null || comp.PrintedThumbnail == null)
+                {
+                    _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key, new DrawingTabletPrintUploadNeededMessage(args.RequestId), args.Actor);
+                    return;
+                }
+                BeginPrint(uid, comp, args.Actor, args.RequestId);
                 return;
             case DrawingTabletAction.Undo when comp.Strokes.Count > 0:
-                comp.Redo.Add(comp.Strokes[^1]);
+                var removed = comp.Strokes[^1];
+                comp.Redo.Add(removed);
                 comp.Strokes.RemoveAt(comp.Strokes.Count - 1);
+                if (DrawingRaster.Validate(removed, out var removedWork))
+                {
+                    comp.TotalPoints -= removed.Points.Count;
+                    comp.RenderWork -= removedWork;
+                }
                 Changed(comp);
                 break;
             case DrawingTabletAction.Redo when comp.Redo.Count > 0:
                 restoredStroke = comp.Redo[^1];
                 comp.Strokes.Add(restoredStroke);
                 comp.Redo.RemoveAt(comp.Redo.Count - 1);
+                if (DrawingRaster.Validate(restoredStroke, out var restoredWork))
+                {
+                    comp.TotalPoints += restoredStroke.Points.Count;
+                    comp.RenderWork += restoredWork;
+                }
                 Changed(comp);
                 break;
             case DrawingTabletAction.Clear:
@@ -230,10 +245,11 @@ public sealed partial class DrawingTabletSystem : EntitySystem
                 }
                 comp.Strokes.Clear();
                 comp.Redo.Clear();
+                comp.TotalPoints = 0;
+                comp.RenderWork = 0;
                 Changed(comp);
                 break;
         }
-        Recount(comp);
         if (args.Action is DrawingTabletAction.Undo or DrawingTabletAction.Redo)
         {
             _ui.ServerSendUiMessage(uid, DrawingTabletUiKey.Key,
@@ -257,6 +273,8 @@ public sealed partial class DrawingTabletSystem : EntitySystem
         }
         return false;
     }
+
+    private void OnTabletStartup(EntityUid uid, DrawingTabletComponent comp, ComponentStartup args) => Recount(comp);
 
     private static void Recount(DrawingTabletComponent comp)
     {
