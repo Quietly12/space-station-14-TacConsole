@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Numerics;
 using Content.Client.Actions;
+using Content.Client._Starlight.Magic;
 using Content.Client.Construction;
 using Content.Client.Gameplay;
 using Content.Client.Hands;
@@ -11,6 +12,8 @@ using Content.Client.UserInterface.Systems.Actions.Widgets;
 using Content.Client.UserInterface.Systems.Actions.Windows;
 using Content.Client.UserInterface.Systems.Gameplay;
 using Content.Shared.Actions.Components;
+using Content.Shared.Magic.Components;
+using Content.Shared.Mobs.Components;
 using Content.Shared.Input;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
@@ -42,6 +45,7 @@ public sealed partial class ActionUIController : UIController, IOnStateChanged<G
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPlayerManager _playerManager = default!;
     [Dependency] private IInputManager _input = default!;
+    [Dependency] private IEyeManager _wizardPreviewEye = default!;
 
     [UISystemDependency] private readonly ActionsSystem? _actionsSystem = default;
     [UISystemDependency] private readonly InteractionOutlineSystem? _interactionOutline = default;
@@ -836,6 +840,10 @@ public sealed partial class ActionUIController : UIController, IOnStateChanged<G
         StopTargeting();
 
         SelectingTargetFor = uid;
+        if (EntityManager.HasComponent<MagicComponent>(uid) &&
+            !EntityManager.HasComponent<EntityTargetActionComponent>(uid))
+            _overlays.AddOverlay(new WizardSpellTargetOverlay(EntityManager, _input,
+                _wizardPreviewEye, _playerManager, uid));
         // TODO inform the server
         _actionsSystem?.SetToggled(uid, true);
 
@@ -874,10 +882,18 @@ public sealed partial class ActionUIController : UIController, IOnStateChanged<G
         Func<EntityUid, bool>? predicate = null;
         var attachedEnt = action.AttachedEntity;
 
-        if (!entity.CanTargetSelf)
+        if (EntityManager.HasComponent<MagicComponent>(uid))
+        {
+            // Entity-targeted wizard spells use the interaction outline on mobs only.
+            predicate = e => (entity.CanTargetSelf || e != attachedEnt) &&
+                EntityManager.HasComponent<MobStateComponent>(e);
+        }
+        else if (!entity.CanTargetSelf)
             predicate = e => e != attachedEnt;
 
-        var range = target.CheckCanAccess ? target.Range : -1;
+        var range = EntityManager.HasComponent<MagicComponent>(uid) || target.CheckCanAccess
+            ? target.Range
+            : -1;
 
         _interactionOutline?.SetEnabled(false);
         _targetOutline?.Enable(range, target.CheckCanAccess, predicate, entity.Whitelist, entity.Blacklist, null);
@@ -896,6 +912,7 @@ public sealed partial class ActionUIController : UIController, IOnStateChanged<G
         _actionsSystem?.SetToggled(oldAction, false);
 
         SelectingTargetFor = null;
+        _overlays.RemoveOverlay<WizardSpellTargetOverlay>();
 
         _targetOutline?.Disable();
         _interactionOutline?.SetEnabled(true);

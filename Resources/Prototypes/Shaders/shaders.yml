@@ -115,6 +115,11 @@
   id: Hologram
   kind: source
   path: "/Textures/Shaders/hologram.swsl"
+
+- type: shader
+  id: WizardIllusion
+  kind: source
+  path: "/Textures/Shaders/wizard_illusion.swsl"
   
 - type: shader
   id: HeatBlur

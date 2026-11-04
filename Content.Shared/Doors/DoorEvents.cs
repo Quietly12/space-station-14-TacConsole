@@ -2,6 +2,9 @@ using Content.Shared.Doors.Components;
 
 namespace Content.Shared.Doors
 {
+    [ByRefEvent]
+    public readonly record struct DoorOpenedByUserEvent(EntityUid Door);
+
     /// <summary>
     /// Raised when the door's State variable is changed to a new variable that it was not equal to before.
     /// </summary>

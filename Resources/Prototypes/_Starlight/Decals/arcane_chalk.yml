@@ -1,0 +1,7 @@
+- type: decal
+  id: WizardArcaneChalkDecal
+  defaultCleanable: true
+  defaultCustomColor: true
+  sprite:
+    sprite: Fluids/writing.rsi
+    state: writing-1

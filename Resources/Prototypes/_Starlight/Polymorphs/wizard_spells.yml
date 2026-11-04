@@ -1,0 +1,13 @@
+- type: polymorph
+  id: WizardFrogCurse
+  configuration:
+    entity: MobWizardCursedFrog
+    forced: true
+    transferName: true
+    transferDamage: true
+    inventory: None
+    revertOnDeath: true
+    polymorphSound: !type:SoundPathSpecifier
+      path: /Audio/Magic/forcewall.ogg
+    exitPolymorphSound: !type:SoundPathSpecifier
+      path: /Audio/Magic/forcewall.ogg

@@ -1,0 +1,4 @@
+- type: currency
+  id: ApprenticeWizCoin
+  displayName: store-currency-display-apprentice-wizcoin
+  canWithdraw: false

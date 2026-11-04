@@ -1,0 +1,521 @@
+- type: entity
+  parent: BaseAction
+  id: ActionWizardCluwneCurseIndicator
+  name: -NR- Cluwne curse
+  description: -NR- A chaplain can try to cure this curse with a Bible.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Clothing/Mask/cluwne.rsi, state: icon }
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardSlipperyCurseIndicator
+  name: -NR- Slippery curse
+  description: -NR- Complete a washing machine cycle to remove this curse.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Objects/Specific/Janitorial/soap.rsi, state: omega-4 }
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardFrogCurse
+  name: Frog
+  description: "Curse a target into the form of a frog. Only a hug or damage can cure them. Range: Touch"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Mobs/Animals/frog.rsi, state: frog }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/frog_magic.ogg
+  - type: EntityTargetAction
+    event: !type:FrogCurseSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-frog
+    tts: action-speech-spell-wizard-frog
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardSummonBeeSwarm
+  name: Summon Bees
+  description: "Summons a swarm of bees, they're angry, they're very angry, what did you expect? Range: Self"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Mobs/Animals/bee.rsi, state: 0 }
+  - type: InstantAction
+    event: !type:SummonBeeSwarmSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+  - type: Item
+    itemIconStyle: BigAction
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardDoomCurse
+  name: Curse of Doom
+  description: "Give the target foresight into their own demise, they must complete a task and alter their own timeline in 60 seconds or die. Range: Touch"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: _Starlight/Interface/Alerts/skull.rsi, state: skull }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/doom.ogg
+  - type: EntityTargetAction
+    event: !type:DoomCurseSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardDoomCurseIndicator
+  name: Curse of Doom
+  description: -NR- Complete your assigned task before the timer runs out.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: _Starlight/Interface/Alerts/skull.rsi, state: skull }
+
+- type: entity
+  id: EffectWizardDoomSkull
+  name: -NR- doom skull
+  components:
+  - type: Sprite
+    sprite: _Starlight/Interface/Alerts/skull.rsi
+    state: skull
+    offset: 0,0.75
+    drawdepth: Effects
+
+- type: entity
+  id: EffectWizardDoomDigit0
+  name: -NR- doom countdown digit
+  components:
+  - type: Sprite
+    sprite: Effects/text.rsi
+    state: "0"
+    color: "#FF4444"
+    scale: 5,5
+    drawdepth: Effects
+
+- type: entity
+  parent: EffectWizardDoomDigit0
+  id: EffectWizardDoomDigit1
+  components:
+  - type: Sprite
+    state: "1"
+
+- type: entity
+  parent: EffectWizardDoomDigit0
+  id: EffectWizardDoomDigit2
+  components:
+  - type: Sprite
+    state: "2"
+
+- type: entity
+  parent: EffectWizardDoomDigit0
+  id: EffectWizardDoomDigit3
+  components:
+  - type: Sprite
+    state: "3"
+
+- type: entity
+  parent: EffectWizardDoomDigit0
+  id: EffectWizardDoomDigit4
+  components:
+  - type: Sprite
+    state: "4"
+
+- type: entity
+  parent: EffectWizardDoomDigit0
+  id: EffectWizardDoomDigit5
+  components:
+  - type: Sprite
+    state: "5"
+
+- type: entity
+  parent: EffectWizardDoomDigit0
+  id: EffectWizardDoomDigit6
+  components:
+  - type: Sprite
+    state: "6"
+
+- type: entity
+  parent: EffectWizardDoomDigit0
+  id: EffectWizardDoomDigit7
+  components:
+  - type: Sprite
+    state: "7"
+
+- type: entity
+  parent: EffectWizardDoomDigit0
+  id: EffectWizardDoomDigit8
+  components:
+  - type: Sprite
+    state: "8"
+
+- type: entity
+  parent: EffectWizardDoomDigit0
+  id: EffectWizardDoomDigit9
+  components:
+  - type: Sprite
+    state: "9"
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardInteriorRustic
+  name: Interior Redecorating
+  description: "Channel nature to convert nearby floors, walls, windows, and doors into something a little more organic. Gnome and garden approved! Range: 4"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: spell_default }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/Magic/forcewall.ogg
+  - type: InstantAction
+    event: !type:InteriorRedecoratingSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardStaticElectricity
+  name: Static Electricity
+  description: "Curse a target to shock anyone who touches them. Cured by eating insulated gloves. Range: Touch"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Clothing/Hands/Gloves/Color/yellow.rsi, state: icon }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/lightningbolt.ogg
+  - type: EntityTargetAction
+    event: !type:StaticElectricitySpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardStaticElectricityIndicator
+  name: -NR- Static Electricity curse
+  description: -NR- Contact shocks others. Eat insulated gloves or have someone feed them to you to end this curse.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Clothing/Hands/Gloves/Color/yellow.rsi, state: icon }
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardLocalizedZeroGravity
+  name: Gravity Shift
+  description: "Turns off gravity in a localized area, leaving too quickly will cause you to fall flat on your face! Range: Self"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Clothing/Shoes/Boots/moonboots.rsi, state: icon }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/Magic/blink.ogg
+  - type: InstantAction
+    event: !type:LocalizedZeroGravitySpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardFrogCurseIndicator
+  name: -NR- Frog curse
+  description: -NR- You are a frog. Another crew member can hug you, or taking damage will change you back.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Mobs/Animals/frog.rsi, state: frog }
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardNewPerspective
+  name: New Perspective
+  description: "Make a target dizzy, twisting their view until they take a moment to sit on a chair and recover. Range: 4"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: blink }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/Magic/blink.ogg
+  - type: EntityTargetAction
+    event: !type:PerspectiveSpellEvent
+  - type: TargetAction
+    range: 4
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardPerspectiveCurseIndicator
+  name: -NR- New Perspective curse
+  description: -NR- You feel dizzy. Sit in a chair to restore your view. Camera controls unlock after one minute.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: blink }
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardMagicMissile
+  name: Magic Missile
+  description: "Fire a slow homing orb at every nearby target, hits knock them down temporarily. Range: 4"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: magicmissile }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/magic_missile_cast.ogg
+  - type: InstantAction
+    event: !type:MagicMissileSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-magic-missile
+    tts: action-speech-spell-wizard-magic-missile-tts
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: MobFrog
+  id: MobWizardCursedFrog
+  name: -NR- cursed frog
+  description: -NR- A person under a wizard's frog curse.
+  components:
+  - type: Speech
+  - type: InteractionPopup
+    successChance: 1
+    interactSuccessString: wizard-frog-hug-success
+    interactFailureString: petting-failure-generic
+    interactSuccessSpawn: EffectHearts
+    interactSuccessSound:
+      path: /Audio/Animals/frog_ribbit.ogg
+
+- type: entity
+  id: EffectWizardPerspectiveDizzy
+  name: -NR- dizzy stars
+  components:
+  - type: Sprite
+    sprite: Mobs/Effects/stunned.rsi
+    state: stunned
+    offset: 0,0.4
+  - type: TimedDespawn
+    lifetime: 1
+
+- type: entity
+  parent: BaseBullet
+  id: ProjectileWizardMagicMissile
+  name: -NR- magic missile
+  description: -NR- A pursuing magical orb.
+  components:
+  - type: Sprite
+    sprite: _Starlight/Objects/Weapons/Guns/Projectiles/magic.rsi
+    layers:
+    - state: iceorb
+      color: "#ff66ff"
+      shader: unshaded
+  - type: Projectile
+    impactEffect: null
+    soundHit:
+      path: /Audio/_Starlight/Magic/mm_hit.ogg
+    damage:
+      types:
+        Blunt: 0
+  - type: TimedDespawn
+    lifetime: 4
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardSnailCurse
+  name: Curse of the Snail
+  description: "Force a target to crawl like a snail, they'll even leave a slippery trail! Range: 3"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Mobs/Animals/snail.rsi, state: snail }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/Magic/forcewall.ogg
+  - type: EntityTargetAction
+    event: !type:SnailCurseSpellEvent
+  - type: TargetAction
+    range: 3
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardSnailCurseIndicator
+  name: Curse of the Snail
+  description: -NR- You are forced to crawl and leave lube behind you. The curse ends after one minute.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Mobs/Animals/snail.rsi, state: snail }
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardNoirCurse
+  name: Curse of Noir
+  description: "Give a target Noir Vision, forcing them to see the world in black, white and red until they have a drink at the bar. Range: 4"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Clothing/Eyes/Glasses/noir.rsi, state: icon }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/Magic/forcewall.ogg
+  - type: EntityTargetAction
+    event: !type:NoirCurseSpellEvent
+  - type: TargetAction
+    range: 4
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardNoirCurseIndicator
+  name: Curse of Noir
+  description: -NR- Your world looks like noir. Drink anything from a metamorphic glass to cure it.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Clothing/Eyes/Glasses/noir.rsi, state: icon }
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardAncientCurse
+  name: Curse of the Ancients
+  description: "Force the burdens of history upon one unlucky soul. They'll be forced to move only in full tiles at a time. Cured by holy water. Range: Touch"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: spell_default }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/Magic/forcewall.ogg
+  - type: EntityTargetAction
+    event: !type:AncientCurseSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardAncientCurseIndicator
+  name: Curse of the Ancients
+  description: -NR- You can only move one tile at a time. Splash yourself with holy water to cure it.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: spell_default }
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardMoodsCurse
+  name: Curse of Hysteria
+  description: 'Gives the target one random new Thaven mood. Cured by Psicodine. Range: Touch'
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Interface/Actions/actions_borg.rsi, state: state-laws }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/Magic/forcewall.ogg
+  - type: EntityTargetAction
+    event: !type:MoodsCurseSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardMoodsCurseIndicator
+  name: Curse of Hysteria
+  description: -NR- You have been given a Thaven mood. Metabolize five units of Psicodine to cure it.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Interface/Actions/actions_borg.rsi, state: state-laws }
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardMassLocationSwap
+  name: Crowd Swap
+  description: Shuffle the locations of all nearby living creatures within 5 tiles, who knows where you'll end up!
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: blink }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/teleport_diss.ogg
+  - type: InstantAction
+    event: !type:MassLocationSwapSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-mass-swap
+    tts: action-speech-spell-wizard-mass-swap
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true

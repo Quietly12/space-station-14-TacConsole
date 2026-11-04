@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Based on the Wizard job icon originally by ScarKy0 (https://github.com/space-wizards/space-station-14/commit/7c6028bc8037306536dca68f3c2cdd5edec56d14), edited by DinnerCalzone. Apprentice and dominated edits by Rescue for Starlight.",
+  "size": {
+    "x": 8,
+    "y": 8
+  },
+  "states": [
+    { "name": "wizard_apprentice" },
+    { "name": "wizard_dominated" }
+  ]
+}

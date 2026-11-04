@@ -104,6 +104,8 @@ public sealed partial class InteractionPopupSystem : EntitySystem
 
             var ev = new InteractionSuccessEvent(user);
             RaiseLocalEvent(target, ref ev);
+            var performed = new InteractionPerformedEvent(target);
+            RaiseLocalEvent(user, ref performed);
         }
         else
         {

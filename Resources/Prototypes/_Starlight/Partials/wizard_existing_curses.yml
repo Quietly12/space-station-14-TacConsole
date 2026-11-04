@@ -1,0 +1,15 @@
+- type: !PartialOnly entity
+  id: ActionCluwne
+  components:
+  - type: EntityTargetAction
+    event: !type:ChangeComponentsSpellEvent
+      toAdd:
+      - type: WizardCluwneCurse
+
+- type: !PartialOnly entity
+  id: ActionSlippery
+  components:
+  - type: EntityTargetAction
+    event: !type:ChangeComponentsSpellEvent
+      toAdd:
+      - type: WizardSlipperyCurse

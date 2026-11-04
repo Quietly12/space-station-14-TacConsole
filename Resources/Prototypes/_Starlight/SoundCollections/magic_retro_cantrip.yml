@@ -1,0 +1,9 @@
+- type: soundCollection
+  id: MagicRetroCantrip
+  files:
+  - /Audio/_Starlight/Magic/magic_retro_1.ogg
+  - /Audio/_Starlight/Magic/magic_retro_2.ogg
+  - /Audio/_Starlight/Magic/magic_retro_3.ogg
+  - /Audio/_Starlight/Magic/magic_retro_4.ogg
+  - /Audio/_Starlight/Magic/magic_retro_5.ogg
+  - /Audio/_Starlight/Magic/magic_retro_6.ogg

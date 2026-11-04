@@ -1,0 +1,136 @@
+- type: entity
+  parent: BaseAction
+  id: ActionWizardTrashGolem
+  name: Trash Golem
+  description: "Conjures an obedient golem out of all that non-magical junk they leave sitting around. The more valuable the stuff, the better the golem!"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Mobs/Aliens/flesh.rsi, state: golem }
+  - type: InstantAction
+    event: !type:TrashGolemSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardTrashGolemStay
+  name: -NR- Stay
+  description: -NR- Tell your trash golems to stand still.
+  components:
+  - type: Action
+    useDelay: 1
+    icon: { sprite: Interface/Actions/actions_rat_king.rsi, state: stayOff }
+    iconOn: { sprite: Interface/Actions/actions_rat_king.rsi, state: stay }
+  - type: InstantAction
+    event: !type:TrashGolemOrderActionEvent
+      type: Stay
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardTrashGolemFollow
+  name: -NR- Follow
+  description: -NR- Tell your trash golems to follow you.
+  components:
+  - type: Action
+    useDelay: 1
+    icon: { sprite: Interface/Actions/actions_rat_king.rsi, state: followOff }
+    iconOn: { sprite: Interface/Actions/actions_rat_king.rsi, state: follow }
+  - type: InstantAction
+    event: !type:TrashGolemOrderActionEvent
+      type: Follow
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardTrashGolemAttack
+  name: -NR- Attack Everyone
+  description: -NR- Send your trash golems after nearby hostiles. Point at someone to focus the golems on them.
+  components:
+  - type: Action
+    useDelay: 1
+    icon: { sprite: Interface/Actions/actions_rat_king.rsi, state: attackOff }
+    iconOn: { sprite: Interface/Actions/actions_rat_king.rsi, state: attack }
+  - type: InstantAction
+    event: !type:TrashGolemOrderActionEvent
+      type: Loose
+
+- type: entity
+  parent: MobFleshGolem
+  id: MobWizardTrashGolem
+  name: -NR- trash golem
+  description: -NR- A heap of discarded things animated into a shambling servant.
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: WizardTrashGolemVisual
+  - type: HTN
+    rootTask:
+      task: WizardTrashGolemCompound
+    blackboard:
+      FollowCloseRange: !type:Single 2.0
+      FollowRange: !type:Single 3.0
+  - type: NPCImprintingOnSpawnBehaviour
+    spawnFriendsSearchRadius: 0.01
+    whitelist:
+      components:
+      - WizardTrashGolem
+  - type: NpcFactionMember
+    factions:
+    - Wizard
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 2
+    baseSprintSpeed: 2.5
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      40: Dead
+  - type: MeleeWeapon
+    damage:
+      types:
+        Blunt: 6
+
+- type: htnCompound
+  id: WizardTrashGolemCompound
+  branches:
+  - preconditions:
+    - !type:HasOrdersPrecondition
+      orders: enum.RatKingOrderType.Stay
+    tasks:
+    - !type:HTNCompoundTask
+      task: IdleCompound
+  - preconditions:
+    - !type:HasOrdersPrecondition
+      orders: enum.RatKingOrderType.Follow
+    tasks:
+    - !type:HTNCompoundTask
+      task: FollowCompound
+  - preconditions:
+    - !type:HasOrdersPrecondition
+      orders: enum.RatKingOrderType.CheeseEm
+    tasks:
+    - !type:HTNCompoundTask
+      task: WizardTrashGolemTargetAttackCompound
+  - preconditions:
+    - !type:HasOrdersPrecondition
+      orders: enum.RatKingOrderType.Loose
+    tasks:
+    - !type:HTNCompoundTask
+      task: SimpleHostileCompound
+
+- type: htnCompound
+  id: WizardTrashGolemTargetAttackCompound
+  branches:
+  - tasks:
+    - !type:HTNPrimitiveTask
+      operator: !type:UtilityOperator
+        proto: OrderedTargets
+    - !type:HTNCompoundTask
+      task: MeleeAttackOrderedTargetCompound
+  - tasks:
+    - !type:HTNCompoundTask
+      task: FollowCompound

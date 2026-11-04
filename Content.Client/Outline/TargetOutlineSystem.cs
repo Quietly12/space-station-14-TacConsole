@@ -172,7 +172,7 @@ public sealed partial class TargetOutlineSystem : EntitySystem
             {
                 var origin = _transformSystem.GetWorldPosition(player);
                 var target = _transformSystem.GetWorldPosition(entity);
-                valid = (origin - target).LengthSquared() <= Range;
+                valid = (origin - target).LengthSquared() <= Range * Range;
             }
 
             // highlight depending on whether its in or out of range

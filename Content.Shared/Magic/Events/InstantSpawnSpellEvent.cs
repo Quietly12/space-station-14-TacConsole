@@ -1,4 +1,5 @@
 using Content.Shared.Actions;
+using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared.Magic.Events;
@@ -19,4 +20,7 @@ public sealed partial class InstantSpawnSpellEvent : InstantActionEvent
     /// </summary>
     [DataField]
     public MagicInstantSpawnData PosData = new TargetCasterPos();
+
+    [DataField]
+    public SoundSpecifier? CastSound;
 }

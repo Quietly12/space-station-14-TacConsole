@@ -1,0 +1,148 @@
+- type: entity
+  parent: WeaponWandBase
+  id: WeaponWandRandomCurses
+  name: wand of random curses
+  description: Fires a projectile that applies a random curse to anyone hit. Results may vary.
+  components:
+  - type: Sprite
+    layers:
+    - state: poly
+    - state: poly-effect
+      map: ["effect"]
+      color: "#8E60A8"
+  - type: Gun
+    fireRate: 1
+    projectileSpeed: 8
+    selectedMode: SemiAuto
+    availableModes: [SemiAuto]
+  - type: BasicEntityAmmoProvider
+    proto: ProjectileWizardRandomCurse
+    capacity: 5
+    count: 5
+  - type: WizardRandomCurseWand
+
+- type: entity
+  parent: BaseBullet
+  id: ProjectileWizardRandomCurse
+  name: -NR- random curse orb
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: _Starlight/Objects/Weapons/Guns/Projectiles/magic.rsi
+    layers:
+    - state: fireorb
+      color: "#B577CE"
+      shader: unshaded
+    scale: 0.6,0.6
+    drawdepth: Effects
+  - type: Projectile
+    damage:
+      types:
+        Blunt: 0
+  - type: TimedDespawn
+    lifetime: 4
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardInvisibilityCurse
+  name: Curse of Invisibility
+  description: "Curse a target with invisibility until they attack or take damage. Is this even a curse? Range: 5"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: jaunt }
+  - type: EntityTargetAction
+    event: !type:WizardInvisibilityCurseSpellEvent
+  - type: TargetAction
+    range: 5
+    checkCanAccess: false
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardInvisibilityCurseIndicator
+  name: Curse of Invisibility
+  description: -NR- You are invisible until you attack or take damage.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: jaunt }
+
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardDominateMind
+  name: Dominate Mind
+  description: "Compel an unshielded target to serve and protect you. Can be broken by a mindshield. Range: Touch"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: spell_default }
+  - type: EntityTargetAction
+    event: !type:WizardDominateMindSpellEvent
+  - type: TargetAction
+    range: 1.5
+    checkCanAccess: false
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardDominationIndicator
+  name: Mind Dominated
+  description: -NR- A wizard controls your mind. A mindshield can release you.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: _Starlight/Interface/Misc/wizard_relationships.rsi, state: wizard_dominated }
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardMeteorSwarm
+  name: Meteor Swarm
+  description: Strike a 7x7 area with 2-4 meteors, generally a terrible idea.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: fireball }
+  - type: TargetAction
+    range: 8
+    checkCanAccess: false
+  - type: WorldTargetAction
+    event: !type:WizardMeteorSwarmSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  id: EffectWizardMeteorWarning
+  name: -NR- meteor storm warning
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: Effects/chemsmoke.rsi
+    state: chemsmoke_white
+    color: "#E67B5C77"
+    scale: 3.33,3.33
+    drawdepth: Effects
+  - type: TimedDespawn
+    lifetime: 1.6

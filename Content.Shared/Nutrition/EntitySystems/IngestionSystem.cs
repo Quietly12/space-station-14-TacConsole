@@ -392,6 +392,9 @@ public sealed partial class IngestionSystem : EntitySystem
         }
         #endregion
 
+        var ingestedByUser = new IngestedByUserEvent(food);
+        RaiseLocalEvent(entity, ref ingestedByUser);
+
         if (!afterEv.Destroy)
         {
             if (beforeEv.Transfer >= beforeEv.Max)

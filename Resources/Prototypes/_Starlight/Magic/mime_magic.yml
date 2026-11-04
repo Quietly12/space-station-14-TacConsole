@@ -1,0 +1,193 @@
+- type: entity
+  parent: BaseAction
+  id: ActionMimeInvisibleBarrier
+  name: Invisible Barrier
+  description: Form a 1x3 Invisible barrier behind you for one minute. Great at blocking entire hallways!
+  components:
+  - type: MimeMagicAction
+  - type: Action
+    useDelay: 45
+    itemIconStyle: BigAction
+    icon: { sprite: _Starlight/Objects/Magic/mime_magic.rsi, state: barrier }
+  - type: InstantAction
+    event: !type:InvisibleBarrierActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ActionMimeFingerGun
+  name: Finger Gun
+  description: Draw or put away your trusty finger gun. Hits Inject a small amount of mute toxin into the target. Recovers 1 bullet every 20 seconds.
+  components:
+  - type: MimeMagicAction
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: _Starlight/Objects/Magic/mime_magic.rsi, state: finger_gun }
+  - type: InstantAction
+    event: !type:ToggleFingerGunActionEvent
+  - type: MimeFingerGunAction
+  - type: ContainerContainer
+    containers:
+      mime-finger-gun: !type:Container
+
+- type: entity
+  parent: BaseItem
+  id: WeaponMimeFingerGun
+  name: finger gun
+  description: Careful where you point this thing.
+  categories: [HideSpawnMenu]
+  components:
+  - type: Sprite
+    sprite: _Starlight/Objects/Magic/mime_magic.rsi
+    state: finger_gun
+  - type: Icon
+    sprite: _Starlight/Objects/Magic/mime_magic.rsi
+    state: finger_gun
+  - type: Item
+    size: Small
+  - type: MimeFingerGunItem
+  - type: AmmoCounter
+  - type: Gun
+    fireRate: 2.225
+    selectedMode: SemiAuto
+    availableModes: [SemiAuto]
+    soundGunshot: null
+    soundEmpty: null
+  - type: BasicEntityAmmoProvider
+    proto: ProjectileMimeFingerGun
+    capacity: 5
+    count: 5
+  - type: RechargeBasicEntityAmmo
+    rechargeCooldown: 20
+    rechargeSound: null
+    showExamineText: false
+
+- type: entity
+  parent: BaseAction
+  id: ActionMimeInvisibleHook
+  name: Invisible Lasso
+  description: Throw a lasso at your target, a successful hit knocks them down and drags them back towards you.
+  components:
+  - type: MimeMagicAction
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: _Starlight/Objects/Magic/mime_magic.rsi, state: lasso }
+  - type: InstantAction
+    event: !type:ToggleMimeLassoActionEvent
+  - type: MimeLassoAction
+  - type: ContainerContainer
+    containers:
+      mime-lasso: !type:Container
+
+- type: entity
+  parent: BaseItem
+  id: WeaponMimeInvisibleLasso
+  name: invisible lasso
+  description: -NR-An invisible rope ready to throw.
+  categories: [HideSpawnMenu]
+  components:
+  - type: Sprite
+    sprite: _Starlight/Objects/Magic/mime_magic.rsi
+    state: lasso
+  - type: Icon
+    sprite: _Starlight/Objects/Magic/mime_magic.rsi
+    state: lasso
+  - type: Item
+    size: Small
+  - type: MimeLassoItem
+  - type: AmmoCounter
+  - type: Gun
+    fireRate: 2
+    selectedMode: SemiAuto
+    availableModes: [SemiAuto]
+    soundGunshot: null
+    soundEmpty: null
+  - type: BasicEntityAmmoProvider
+    proto: ProjectileMimeInvisibleHook
+    capacity: 1
+    count: 1
+  - type: RechargeBasicEntityAmmo
+    rechargeCooldown: 30
+    rechargeSound: null
+    showExamineText: false
+
+- type: entity
+  parent: BaseSpellbook
+  id: BookForbiddenMimeMagic
+  name: book of forbidden mime magic
+  description: These pages teach dangerous pantomimes, can only be learned by one who has not broken the vow of silence.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/books.rsi
+    layers:
+    - state: paper
+    - state: cover_strong
+      color: "#181818"
+    - state: decor_wingette_flat
+      color: "#111111"
+  - type: Spellbook
+    learnPermanently: true
+    spellActions:
+      ActionMimeInvisibleBarrier: null
+      ActionMimeFingerGun: null
+      ActionMimeInvisibleHook: null
+  - type: ForbiddenMimeSpellbook
+
+- type: entity
+  parent: WallInvisible
+  id: MimeInvisibleBarrier
+  name: invisible barrier
+  categories: [HideSpawnMenu]
+  components:
+  - type: TimedDespawn
+    lifetime: 60
+
+- type: entity
+  id: BaseMimeInvisibleProjectile
+  abstract: true
+  components:
+  - type: Physics
+    bodyType: Dynamic
+  - type: TileFrictionModifier
+    modifier: 0
+  - type: Fixtures
+    fixtures:
+      projectile:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.1,-0.1,0.1,0.3"
+        hard: false
+        mask: [Impassable, BulletImpassable]
+  - type: TimedDespawn
+    lifetime: 3
+
+- type: entity
+  parent: BaseMimeInvisibleProjectile
+  id: ProjectileMimeFingerGun
+  name: mimed bullet
+  categories: [HideSpawnMenu]
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 22
+  - type: Solution
+    id: ammo
+    solution:
+      maxVol: 0.25
+      reagents:
+      - ReagentId: MuteToxin
+        Quantity: 0.25
+  - type: SolutionInjectOnProjectileHit
+    transferAmount: 0.25
+    solution: ammo
+
+- type: entity
+  parent: BaseMimeInvisibleProjectile
+  id: ProjectileMimeInvisibleHook
+  name: invisible lasso
+  categories: [HideSpawnMenu]
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Blunt: 0
+  - type: InvisibleHookProjectile

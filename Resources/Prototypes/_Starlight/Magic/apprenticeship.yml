@@ -1,0 +1,82 @@
+- type: entity
+  parent: Paper
+  id: WizardApprenticeshipContract
+  name: contract of apprenticeship
+  description: Get your perspective apprentice to sign on the dotted line.
+  components:
+  - type: Paper
+    content: wizard-apprentice-contract-paper-unbound
+    editingDisabled: true
+  - type: WizardApprenticeshipContract
+
+- type: entity
+  id: WizardApprenticeshipContractFlame
+  name: -NR- burning contract
+  components:
+  - type: Sprite
+    sprite: Effects/fire.rsi
+    state: fire
+  - type: TimedDespawn
+    lifetime: 0.6
+
+- type: entity
+  parent: WizardsGrimoire
+  id: WizardsApprenticeGrimoire
+  name: apprentice's tome
+  description: -NR- A compact tome containing simplified arcane formulae for preparing cantrips and conjuring modest equipment. It is bound to the apprentice who signed the contract; the dangerous lessons come later.
+  components:
+  - type: Store
+    name: store-preset-name-apprentice-tome
+    categories: [SpellbookApprenticeCantrips, SpellbookApprenticeOffensive, SpellbookApprenticeDefensive, SpellbookApprenticeUtility, SpellbookApprenticeEquipment]
+    currencyWhitelist: [ApprenticeWizCoin]
+    refundAllowed: false
+    ownerOnly: true
+    balance:
+      ApprenticeWizCoin: 3
+
+- type: storeCategory
+  id: SpellbookApprenticeCantrips
+  name: store-category-spellbook-apprentice-cantrips
+  priority: 0
+
+- type: storeCategory
+  id: SpellbookApprenticeOffensive
+  name: store-category-spellbook-apprentice-offensive
+  priority: 1
+
+- type: storeCategory
+  id: SpellbookApprenticeDefensive
+  name: store-category-spellbook-apprentice-defensive
+  priority: 2
+
+- type: storeCategory
+  id: SpellbookApprenticeUtility
+  name: store-category-spellbook-apprentice-utility
+  priority: 3
+
+- type: storeCategory
+  id: SpellbookApprenticeEquipment
+  name: store-category-spellbook-apprentice-equipment
+  priority: 4
+
+- type: entity
+  parent: BaseMindRoleAntag
+  id: MindRoleWizardApprentice
+  name: -NR- Wizard Apprentice Role
+  components:
+  - type: WizardApprenticeRole
+  - type: MindRole
+    antagPrototype: Wizard
+    exclusiveAntag: true
+    subtype: wizard-apprentice-role-subtype
+
+- type: entity
+  parent: BaseMindRoleAntag
+  id: MindRoleWizardDominated
+  name: -NR- Wizard Dominated Role
+  components:
+  - type: WizardDominationRole
+  - type: MindRole
+    antagPrototype: GenericTeamAntagonist
+    exclusiveAntag: true
+    subtype: wizard-dominated-role-subtype

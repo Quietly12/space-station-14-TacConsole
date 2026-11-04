@@ -1,0 +1,163 @@
+- type: entity
+  parent: BaseAction
+  id: ActionWizardArcaneBarrage
+  name: Arcane Barrage
+  description: Raise a barrage of 15 homing orbs, they'll split among nearby targets, dealing 3 blunt and 10 stamina damage each. Upgradable
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: _Starlight/Interface/Actions/WizardPainterly/fire-arrows-magenta-1.png
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/magic_missile.ogg
+  - type: InstantAction
+    event: !type:ArcaneBarrageSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: ActionUpgrade
+    effectedLevels:
+      2: ActionWizardArcaneBarrageII
+      3: ActionWizardArcaneBarrageIII
+  - type: WizardFullSizeIcon
+  - type: Item
+    itemIconStyle: BigAction
+
+- type: entity
+  parent: ActionWizardArcaneBarrage
+  id: ActionWizardArcaneBarrageII
+  name: Arcane Flurry
+  description: -NR- Raise a flurry of 30 homing orbs, they'll split among nearby targets, dealing 3 blunt and 10 stamina damage each. Upgradable
+  components:
+  - type: Action
+    icon: _Starlight/Interface/Actions/WizardPainterly/fire-arrows-magenta-2.png
+
+- type: entity
+  parent: ActionWizardArcaneBarrage
+  id: ActionWizardArcaneBarrageIII
+  name: Arcane Storm
+  description: -NR- Raise a storm of 45 homing orbs, they'll split among nearby targets, dealing 3 blunt and 10 stamina damage each.
+  components:
+  - type: Action
+    icon: _Starlight/Interface/Actions/WizardPainterly/fire-arrows-magenta-3.png
+
+- type: entity
+  parent: ActionWizardArcaneBarrage
+  id: ActionWizardLightningBarrage
+  name: Lightning Barrage
+  description: Raise a barrage of 15 lightning balls, they seek out nearby targets and deal 3 shock damage, bouncing up to 2 times.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    icon: _Starlight/Interface/Actions/WizardPainterly/fire-arrows-sky-1.png
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/lightningbolt.ogg
+  - type: InstantAction
+    event: !type:LightningBarrageSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: ActionUpgrade
+    effectedLevels:
+      2: ActionWizardLightningBarrageII
+      3: ActionWizardLightningBarrageIII
+
+- type: entity
+  parent: ActionWizardLightningBarrage
+  id: ActionWizardLightningBarrageII
+  name: Lightning Flurry
+  description: -NR- Raise a flurry of 30 lightning balls, they seek out nearby targets and deal 3 shock damage, bouncing up to 2 times.
+  components:
+  - type: Action
+    icon: _Starlight/Interface/Actions/WizardPainterly/fire-arrows-sky-2.png
+
+- type: entity
+  parent: ActionWizardLightningBarrage
+  id: ActionWizardLightningBarrageIII
+  name: Lightning Storm
+  description: -NR- Raise a storm of 45 lightning balls, they seek out nearby targets and deal 3 shock damage, bouncing up to 2 times.
+  components:
+  - type: Action
+    icon: _Starlight/Interface/Actions/WizardPainterly/fire-arrows-sky-3.png
+
+- type: entity
+  id: EffectWizardArcaneBarrageRise
+  name: -NR- rising arcane orb
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    scale: 0.35,0.35
+    drawdepth: OverMobs
+    sprite: _Starlight/Objects/Weapons/Guns/Projectiles/magic.rsi
+    layers:
+    - state: iceorb
+      color: "#B47DFF"
+      shader: unshaded
+  - type: TimedDespawn
+    lifetime: 5
+
+- type: entity
+  id: EffectWizardLightningBarrageRise
+  name: -NR- rising lightning ball
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    scale: 0.25,0.25
+    drawdepth: OverMobs
+    sprite: Structures/Power/Generation/Tesla/energy_miniball.rsi
+    layers:
+    - state: tesla_projectile
+      shader: unshaded
+  - type: TimedDespawn
+    lifetime: 5
+
+- type: entity
+  parent: BaseBullet
+  id: ProjectileWizardArcaneBarrage
+  name: -NR- arcane orb
+  description: -NR- A small pursuing bolt of magic.
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    scale: 0.35,0.35
+    drawdepth: OverMobs
+    sprite: _Starlight/Objects/Weapons/Guns/Projectiles/magic.rsi
+    layers:
+    - state: iceorb
+      color: "#B47DFF"
+      shader: unshaded
+  - type: Projectile
+    impactEffect: null
+    damage:
+      types:
+        Blunt: 3
+  - type: StaminaDamageOnCollide
+    damage: 10
+  - type: TimedDespawn
+    lifetime: 4
+
+- type: entity
+  parent: BaseBullet
+  id: ProjectileWizardLightningBarrage
+  name: -NR- lightning ball
+  description: -NR- A small pursuing ball of lightning.
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    scale: 0.25,0.25
+    drawdepth: OverMobs
+    sprite: Structures/Power/Generation/Tesla/energy_miniball.rsi
+    layers:
+    - state: tesla_projectile
+      shader: unshaded
+  - type: Projectile
+    impactEffect: null
+    damage:
+      types:
+        Shock: 3
+  - type: TimedDespawn
+    lifetime: 4

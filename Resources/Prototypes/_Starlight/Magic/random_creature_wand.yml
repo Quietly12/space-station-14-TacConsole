@@ -1,0 +1,23 @@
+- type: entity
+  parent: WeaponWandBase
+  id: WeaponWandRandomCreature
+  name: Wand of Random Creatures
+  description: Summons a random creature who will consider you friendly, good luck to everyone else. Five Charges.
+  components:
+  - type: Sprite
+    layers:
+    - state: poly
+    - state: poly-effect
+      map: ["effect"]
+      color: "#E7C36D"
+  - type: Gun
+    fireRate: 1
+    projectileSpeed: 5
+    soundGunshot: /Audio/Magic/forcewall.ogg
+    selectedMode: SemiAuto
+    availableModes: [SemiAuto]
+  - type: BasicEntityAmmoProvider
+    proto: ProjectileWizardGunTrigger
+    capacity: 5
+    count: 5
+  - type: WizardRandomCreatureWand

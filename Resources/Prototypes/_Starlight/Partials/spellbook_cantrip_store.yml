@@ -1,0 +1,13 @@
+- type: !PartialOnly entity
+  id: StorePresetSpellbook
+  components:
+  - type: Store
+    categories:
+    - SpellbookOffensive
+    - SpellbookDefensive
+    - SpellbookCurses
+    - SpellbookCantrips
+    - SpellbookUtility
+    - SpellbookEquipment
+    - SpellbookEvents
+    - SpellbookWar

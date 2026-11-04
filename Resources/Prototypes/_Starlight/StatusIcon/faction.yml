@@ -1,4 +1,39 @@
 - type: factionIcon
+  id: WizardAllyIcon
+  priority: 11
+  showTo:
+    components:
+    - WizardAlly
+    - WizardDominationIcon
+    - ShowAntagIcons
+  icon:
+    sprite: /Textures/Interface/Misc/job_icons.rsi
+    state: Wizard
+
+- type: factionIcon
+  id: WizardApprenticeIcon
+  priority: 11
+  showTo:
+    components:
+    - WizardAlly
+    - ShowAntagIcons
+  icon:
+    sprite: /Textures/_Starlight/Interface/Misc/wizard_relationships.rsi
+    state: wizard_apprentice
+
+- type: factionIcon
+  id: WizardDominatedIcon
+  priority: 11
+  showTo:
+    components:
+    - WizardAlly
+    - WizardDominationIcon
+    - ShowAntagIcons
+  icon:
+    sprite: /Textures/_Starlight/Interface/Misc/wizard_relationships.rsi
+    state: wizard_dominated
+
+- type: factionIcon
   id: VampireFaction
   priority: 11
   showTo:

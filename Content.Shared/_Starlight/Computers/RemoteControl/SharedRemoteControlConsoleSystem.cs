@@ -113,6 +113,12 @@ public sealed partial class SharedRemoteControlConsoleSystem : EntitySystem
         if (component.RemoteBrain is not { } brain)
             return false;
 
+        if (HasComp<RemoteControlDirectBodyComponent>(brain))
+        {
+            body = brain;
+            return true;
+        }
+
         if (TryComp<OrganComponent>(brain, out var organ) && organ.Body is { } organBody)
         {
             body = organBody;

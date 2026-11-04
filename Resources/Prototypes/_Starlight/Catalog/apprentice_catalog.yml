@@ -1,0 +1,266 @@
+- type: listing
+  id: ApprenticeSpellbookWandDoor
+  name: spellbook-wand-polymorph-door-name
+  description: spellbook-wand-polymorph-door-description
+  productEntity: WeaponWandPolymorphDoor
+  cost:
+    ApprenticeWizCoin: 3
+  categories:
+  - SpellbookApprenticeEquipment
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookWandPolymorphCarp
+  name: spellbook-wand-polymorph-carp-name
+  description: spellbook-wand-polymorph-carp-description
+  productEntity: WeaponWandPolymorphCarp
+  cost:
+    ApprenticeWizCoin: 3
+  categories:
+  - SpellbookApprenticeEquipment
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookWandLocker
+  name: spellbook-wand-locker-name
+  description: spellbook-wand-locker-description
+  productEntity: WeaponWandLocker
+  cost:
+    ApprenticeWizCoin: 3
+  categories:
+  - SpellbookApprenticeEquipment
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+# Event
+
+- type: listing
+  id: ApprenticeSpellbookStaffHealing
+  name: spellbook-staff-healing-name
+  description: spellbook-staff-healing-description
+  productEntity: WeaponStaffHealing
+  cost:
+    ApprenticeWizCoin: 2
+  categories:
+  - SpellbookApprenticeEquipment
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookSpellSummonCheese
+  name: spellbook-event-summon-cheese-name
+  description: spellbook-event-summon-cheese-description
+  productAction: ActionSummonCheese
+  cost:
+    ApprenticeWizCoin: 1
+  categories:
+  - SpellbookApprenticeCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookCantripSummonDuck
+  name: spellbook-cantrip-summon-duck-name
+  description: spellbook-cantrip-summon-duck-description
+  productAction: ActionSummonDuck
+  cost:
+    ApprenticeWizCoin: 1
+  categories:
+  - SpellbookApprenticeCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookCantripSummonBee
+  name: spellbook-cantrip-summon-bee-name
+  description: spellbook-cantrip-summon-bee-description
+  productAction: ActionSummonBee
+  cost:
+    ApprenticeWizCoin: 1
+  categories:
+  - SpellbookApprenticeCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookCantripSummonBeer
+  name: spellbook-cantrip-summon-beer-name
+  description: spellbook-cantrip-summon-beer-description
+  productAction: ActionSummonBeer
+  cost:
+    ApprenticeWizCoin: 1
+  categories:
+  - SpellbookApprenticeCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookCantripTelepathy
+  name: spellbook-cantrip-telepathy-name
+  description: spellbook-cantrip-telepathy-description
+  productAction: ActionWizardTelepathy
+  cost:
+    ApprenticeWizCoin: 1
+  categories:
+  - SpellbookApprenticeCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookCantripMinorIllusion
+  name: spellbook-cantrip-minor-illusion-name
+  description: spellbook-cantrip-minor-illusion-description
+  productAction: ActionWizardMinorIllusion
+  cost:
+    ApprenticeWizCoin: 1
+  categories:
+  - SpellbookApprenticeCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookCantripSpeakWithDead
+  name: spellbook-cantrip-speak-with-dead-name
+  description: spellbook-cantrip-speak-with-dead-description
+  productAction: ActionWizardSpeakWithDead
+  cost:
+    ApprenticeWizCoin: 1
+  categories:
+  - SpellbookApprenticeCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookCantripMageHand
+  name: spellbook-cantrip-mage-hand-name
+  description: spellbook-cantrip-mage-hand-description
+  productAction: ActionWizardMageHand
+  cost:
+    ApprenticeWizCoin: 1
+  categories:
+  - SpellbookApprenticeCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookCantripArcaneChalk
+  name: spellbook-cantrip-arcane-chalk-name
+  description: spellbook-cantrip-arcane-chalk-description
+  productAction: ActionWizardArcaneChalk
+  cost:
+    ApprenticeWizCoin: 1
+  categories:
+  - SpellbookApprenticeCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookWizardRandomCurseWand
+  name: spellbook-wizard-random-curse-wand-name
+  description: spellbook-wizard-random-curse-wand-description
+  productEntity: WeaponWandRandomCurses
+  cost:
+    ApprenticeWizCoin: 3
+  categories: [SpellbookApprenticeEquipment]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookSpectralBlade
+  name: spellbook-event-mana-blade-name
+  description: spellbook-event-mana-blade-description
+  productAction: ActionRetractableItemManaBlade
+  cost:
+    ApprenticeWizCoin: 1
+  categories: [SpellbookApprenticeOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookFireball
+  name: spellbook-fireball-name
+  description: spellbook-fireball-desc
+  productAction: ActionFireball
+  cost:
+    ApprenticeWizCoin: 2
+  categories: [SpellbookApprenticeOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookSmoke
+  name: spellbook-smoke-name
+  description: spellbook-smoke-desc
+  productAction: ActionSmoke
+  cost:
+    ApprenticeWizCoin: 1
+  categories: [SpellbookApprenticeDefensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookBlink
+  name: spellbook-blink-name
+  description: spellbook-blink-desc
+  productAction: ActionBlink
+  cost:
+    ApprenticeWizCoin: 1
+  categories: [SpellbookApprenticeUtility]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookVoidApplause
+  name: spellbook-voidapplause-name
+  description: spellbook-voidapplause-desc
+  productAction: ActionVoidApplause
+  cost:
+    ApprenticeWizCoin: 1
+  categories: [SpellbookApprenticeUtility]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookItemRecall
+  name: spellbook-item-recall-name
+  description: spellbook-item-recall-description
+  productAction: ActionItemRecall
+  cost:
+    ApprenticeWizCoin: 1
+  categories: [SpellbookApprenticeUtility]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: ApprenticeSpellbookCharge
+  name: spellbook-charge-name
+  description: spellbook-charge-desc
+  productAction: ActionChargeSpell
+  cost:
+    ApprenticeWizCoin: 1
+  categories: [SpellbookApprenticeUtility]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1

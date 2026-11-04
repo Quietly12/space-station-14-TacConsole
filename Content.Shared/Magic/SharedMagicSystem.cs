@@ -136,7 +136,7 @@ public abstract partial class SharedMagicSystem : EntitySystem
         // TODO: Pre-cast do after, either here or in SharedActionsSystem
     }
 
-    private bool PassesSpellPrerequisites(EntityUid spell, EntityUid performer)
+    protected bool PassesSpellPrerequisites(EntityUid spell, EntityUid performer)
     {
         var ev = new BeforeCastSpellEvent(performer);
         RaiseLocalEvent(spell, ref ev);
@@ -160,6 +160,8 @@ public abstract partial class SharedMagicSystem : EntitySystem
             SpawnSpellHelper(args.Prototype, position, args.Performer, preventCollide: args.PreventCollideWithCaster);
         }
 
+        if (args.CastSound != null && _net.IsServer)
+            _audio.PlayPvs(args.CastSound, args.Performer);
         args.Handled = true;
     }
 
@@ -292,6 +294,11 @@ public abstract partial class SharedMagicSystem : EntitySystem
         var xform = Transform(ev.Performer);
         var fromCoords = xform.Coordinates;
         var toCoords = ev.Target;
+        var stopTimeAttempt = new TimeStopProjectileSpellAttemptEvent(ev.Performer, ev.Prototype,
+            fromCoords, toCoords, ev.ProjectileSpeed);
+        RaiseLocalEvent(ref stopTimeAttempt);
+        if (stopTimeAttempt.Suspended)
+            return;
         var userVelocity = _physics.GetMapLinearVelocity(ev.Performer);
 
         // If applicable, this ensures the projectile is parented to grid on spawn, instead of the map.
@@ -609,6 +616,8 @@ public abstract partial class SharedMagicSystem : EntitySystem
         {
             if(ev.SelfDamage != null) //Originally for dolls, maybe has a use for blood magic?
                 _damageable.ChangeDamage(user, ev.SelfDamage, true);
+            if (ev.CastSound != null && _net.IsServer)
+                _audio.PlayPvs(ev.CastSound, user);
             ev.Handled = true;
         }
     }

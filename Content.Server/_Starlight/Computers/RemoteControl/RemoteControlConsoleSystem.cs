@@ -726,6 +726,7 @@ public sealed partial class RemoteControlConsoleSystem : EntitySystem
             && target is { } attackTarget
             && TryComp<CombatModeComponent>(remoteEntity, out var combatMode)
             && combatMode.IsInCombatMode
+            && _interaction.InRangeAndAccessible(remoteEntity, attackTarget)
             && !HasComp<MapGridComponent>(attackTarget)
             && !HasComp<MapComponent>(attackTarget)
             && EntityManager.System<SharedMeleeWeaponSystem>()

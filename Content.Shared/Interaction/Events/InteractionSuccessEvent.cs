@@ -7,3 +7,7 @@ namespace Content.Shared.Interaction.Events;
 // Rename this, or move it to another namespace to make it clearer that this is specific to "petting/hugging" (InteractionPopupSystem)
 [ByRefEvent]
 public readonly record struct InteractionSuccessEvent(EntityUid User);
+
+/// <summary>Raised on the user after a successful hug or pet interaction.</summary>
+[ByRefEvent]
+public readonly record struct InteractionPerformedEvent(EntityUid Target);

@@ -1,0 +1,274 @@
+- type: entity
+  parent: BaseAction
+  id: ActionWizardSleepingCloud
+  name: Sleeping Cloud
+  description: "Releases a gas that puts everyone to sleep! Conjures a magical grenade to your hand."
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: _Starlight/Interface/Actions/WizardPainterly/light-blue-1.png
+  - type: InstantAction
+    event: !type:SleepingCloudSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardCombust
+  name: Combust
+  description: "Releases a gas that quickly detonates explosively. Conjures a magical grenade to your hand."
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: _Starlight/Interface/Actions/WizardPainterly/light-air-fire-1.png
+  - type: InstantAction
+    event: !type:CombustSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  parent: ActionWizardSleepingCloud
+  id: ActionWizardMagicalSauna
+  name: Magical Sauna
+  description: "Detonates into a sauna of magical steam! Conjures a magical grenade to your hand."
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: magicmissile }
+    iconColor: "#77D8FF"
+  - type: InstantAction
+    event: !type:MagicalSaunaSpellEvent
+
+- type: entity
+  parent: ActionWizardSleepingCloud
+  id: ActionWizardStinkCloud
+  name: -NR- Stink Cloud
+  description: Releases a choking cloud of ammonia. Conjures a magical grenade to your hand.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    icon: _Starlight/Interface/Actions/WizardPainterly/light-jade-1.png
+  - type: InstantAction
+    event: !type:StinkCloudSpellEvent
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardAsphyxiate
+  name: Asphyxiate
+  description: "Consume all oxygen in a 3x3 area for 20 seconds. Range: 5"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: spell_default }
+  - type: TargetAction
+    range: 5
+    checkCanAccess: false
+  - type: WorldTargetAction
+    event: !type:AsphyxiateSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  id: EffectWizardAsphyxiateFlame
+  name: -NR- oxygen-eating flame
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Projectiles/magic.rsi
+    state: fireball
+    color: "#55AAFFFF"
+    drawdepth: Effects
+  - type: TimedDespawn
+    lifetime: 20
+
+- type: entity
+  parent: GrenadeBase
+  id: WizardSleepingCloudBall
+  name: -NR- sleeping cloud ball
+  description: -NR- Throw it to release nitrous oxide when it lands.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Projectiles/magic.rsi
+    layers:
+    - state: magicm
+      color: "#B78DFF"
+  - type: TriggerOnLand
+  - type: LandAtCursor
+  - type: ReleaseGasOnTrigger
+    removeFraction: 0.25
+    air:
+      volume: 1000
+      moles:
+        NitrousOxide: 1566 # About half as strong as an air grenade's 3,117.84 moles.
+      temperature: 293.15
+  - type: WizardGasWindOnRelease
+  - type: EmitSoundOnTrigger
+    sound: /Audio/Items/smoke_grenade_smoke.ogg
+  - type: RemoveComponentsOnTrigger
+    triggerOnce: true
+    components:
+    - type: TriggerOnLand
+  - type: TimedDespawn
+    lifetime: 60
+
+- type: entity
+  parent: GrenadeBase
+  id: WizardCombustBall
+  name: -NR- combust ball
+  description: -NR- Throw it to release flammable hydrogen when it lands.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Projectiles/magic.rsi
+    layers:
+    - state: magicm_red
+      color: "#FFAA88"
+  - type: TriggerOnLand
+  - type: LandAtCursor
+  - type: ReleaseGasOnTrigger
+    removeFraction: 0.25
+    air:
+      volume: 1000
+      moles:
+        Hydrogen: 2496 # About four fifths as strong as an air grenade's 3,117.84 moles.
+        Oxygen: 1248 # One oxygen mole per two hydrogen moles.
+        Plasma: 20
+      temperature: 293.15
+  - type: WizardGasSparkOnFinish
+  - type: WizardGasWindOnRelease
+  - type: EmitSoundOnTrigger
+    sound: /Audio/Items/smoke_grenade_smoke.ogg
+  - type: RemoveComponentsOnTrigger
+    triggerOnce: true
+    components:
+    - type: TriggerOnLand
+  - type: TimedDespawn
+    lifetime: 60
+
+- type: entity
+  parent: WizardSleepingCloudBall
+  id: WizardMagicalSaunaBall
+  name: -NR- magical sauna ball
+  description: -NR- Throw it to release steam when it lands.
+  components:
+  - type: ReleaseGasOnTrigger
+    removeFraction: 0.25
+    air:
+      volume: 1000
+      moles:
+        WaterVapor: 315
+      temperature: 373.15
+
+- type: entity
+  parent: WizardSleepingCloudBall
+  id: WizardStinkCloudBall
+  name: -NR- stink cloud ball
+  description: -NR- Throw it to release ammonia when it lands.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Projectiles/magic.rsi
+    layers:
+    - state: magicm
+      color: "#77B34A"
+  - type: ReleaseGasOnTrigger
+    removeFraction: 0.25
+    air:
+      volume: 1000
+      moles:
+        Ammonia: 1566 # About half as strong as an air grenade's 3,117.84 moles.
+      temperature: 293.15
+
+- type: entity
+  id: EffectWizardGasWindOut
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: ParticleEmitter
+    effect: WizardGasWindOut
+  - type: TimedDespawn
+    lifetime: 0.75
+
+- type: entity
+  parent: EffectWizardGasWindOut
+  id: EffectWizardGasWindInNorth
+  components:
+  - type: ParticleEmitter
+    effect: WizardGasWindInNorth
+
+- type: entity
+  parent: EffectWizardGasWindOut
+  id: EffectWizardGasWindInEast
+  components:
+  - type: ParticleEmitter
+    effect: WizardGasWindInEast
+
+- type: entity
+  parent: EffectWizardGasWindOut
+  id: EffectWizardGasWindInSouth
+  components:
+  - type: ParticleEmitter
+    effect: WizardGasWindInSouth
+
+- type: entity
+  parent: EffectWizardGasWindOut
+  id: EffectWizardGasWindInWest
+  components:
+  - type: ParticleEmitter
+    effect: WizardGasWindInWest
+
+- type: particleEffect
+  id: WizardGasWindOut
+  sprite:
+    sprite: Effects/chemsmoke.rsi
+    state: chemsmoke_white
+  startColor: "#B9E9FFAA"
+  endColor: "#B9E9FF00"
+  lifetime: 0.55
+  lifetimeVariance: 0.08
+  speed: 1.8
+  speedVariance: 0.2
+  particleSize: 0.16
+  sizeVariance: 0.04
+  emissionRate: 24
+  maxCount: 16
+  burst: true
+  duration: 0.15
+  gravity: 0
+
+- type: particleEffect
+  parent: WizardGasWindOut
+  id: WizardGasWindInNorth
+  spreadAngle: 25
+  emitAngle: 180
+  maxCount: 5
+
+- type: particleEffect
+  parent: WizardGasWindInNorth
+  id: WizardGasWindInEast
+  emitAngle: 270
+
+- type: particleEffect
+  parent: WizardGasWindInNorth
+  id: WizardGasWindInSouth
+  emitAngle: 0
+
+- type: particleEffect
+  parent: WizardGasWindInNorth
+  id: WizardGasWindInWest
+  emitAngle: 90

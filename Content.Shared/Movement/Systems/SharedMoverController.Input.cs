@@ -174,7 +174,9 @@ namespace Content.Shared.Movement.Systems
 
         public void RotateCamera(EntityUid uid, Angle angle)
         {
-            if (CameraRotationLocked || !MoverQuery.TryGetComponent(uid, out var mover))
+            if (CameraRotationLocked ||
+                TryComp<Content.Shared._Starlight.Magic.Components.PerspectiveCurseComponent>(uid, out var curse) && curse.RotationLocked ||
+                !MoverQuery.TryGetComponent(uid, out var mover))
                 return;
 
             mover.TargetRelativeRotation += angle;
@@ -184,6 +186,7 @@ namespace Content.Shared.Movement.Systems
         public void ResetCamera(EntityUid uid)
         {
             if (CameraRotationLocked ||
+                TryComp<Content.Shared._Starlight.Magic.Components.PerspectiveCurseComponent>(uid, out var curse) && curse.RotationLocked ||
                 !MoverQuery.TryGetComponent(uid, out var mover))
             {
                 return;

@@ -381,6 +381,12 @@ public abstract partial class SharedDoorSystem : EntitySystem
         if (!SetState(uid, DoorState.Opening, door, user)) // Starlight: pass user through
             return;
 
+        if (user is { } opener)
+        {
+            var opened = new DoorOpenedByUserEvent(uid);
+            RaiseLocalEvent(opener, ref opened);
+        }
+
         if (predicted)
             Audio.PlayPredicted(door.OpenSound, uid, user, AudioParams.Default.WithVolume(-5));
         else if (_net.IsServer)

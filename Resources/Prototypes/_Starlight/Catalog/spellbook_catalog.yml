@@ -17,9 +17,113 @@
   description: spellbook-event-summon-cheese-description
   productAction: ActionSummonCheese
   cost:
-    WizCoin: 0 #ITS FREE
+    WizCoin: 1
   categories:
-  - SpellbookUtility
+  - SpellbookCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookCantripSummonDuck
+  name: spellbook-cantrip-summon-duck-name
+  description: spellbook-cantrip-summon-duck-description
+  productAction: ActionSummonDuck
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookCantripSummonBee
+  name: spellbook-cantrip-summon-bee-name
+  description: spellbook-cantrip-summon-bee-description
+  productAction: ActionSummonBee
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookCantripSummonBeer
+  name: spellbook-cantrip-summon-beer-name
+  description: spellbook-cantrip-summon-beer-description
+  productAction: ActionSummonBeer
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookCantripTelepathy
+  name: spellbook-cantrip-telepathy-name
+  description: spellbook-cantrip-telepathy-description
+  productAction: ActionWizardTelepathy
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookCantripMinorIllusion
+  name: spellbook-cantrip-minor-illusion-name
+  description: spellbook-cantrip-minor-illusion-description
+  productAction: ActionWizardMinorIllusion
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookCantripSpeakWithDead
+  name: spellbook-cantrip-speak-with-dead-name
+  description: spellbook-cantrip-speak-with-dead-description
+  productAction: ActionWizardSpeakWithDead
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookCantripMageHand
+  name: spellbook-cantrip-mage-hand-name
+  description: spellbook-cantrip-mage-hand-description
+  productAction: ActionWizardMageHand
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCantrips
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookCantripArcaneChalk
+  name: spellbook-cantrip-arcane-chalk-name
+  description: spellbook-cantrip-arcane-chalk-description
+  productAction: ActionWizardArcaneChalk
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCantrips
   conditions:
   - !type:ListingLimitedStockCondition
     stock: 1
@@ -32,7 +136,7 @@
   cost:
     WizCoin: 5 #half your WC to cause a total and complete communication breakdown on the station? sign me up!
   categories:
-  - SpellbookUtility
+  - SpellbookCurses
   conditions:
   - !type:ListingLimitedStockCondition
     stock: 1

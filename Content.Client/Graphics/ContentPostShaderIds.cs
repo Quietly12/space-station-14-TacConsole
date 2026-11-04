@@ -11,6 +11,7 @@ public static class ContentPostShaderIds
 
     // Starlight-start
     public const string Hologram = "hologram";
+    public const string WizardIllusion = "wizard-illusion";
     public const string ReactorPart = "reactor-part";
     // Starlight-end
 

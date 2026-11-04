@@ -1,0 +1,51 @@
+- type: entity
+  parent: BaseAction
+  id: ActionWizardStopTime
+  name: Stop time
+  description: Stops time in a 5x5 area for 10 seconds. Only those who know this spell can move.
+  components:
+  - type: Action
+    useDelay: 1
+    itemIconStyle: BigAction
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: spell_default }
+  - type: InstantAction
+    event: !type:WizardStopTimeSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-stop-time
+    tts: action-speech-spell-wizard-stop-time-tts
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  id: EffectWizardStopTimeField
+  name: -NR- stopped time
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: Effects/chronofield.rsi
+    state: chronofield
+    color: "#8C6CD4AA"
+    drawdepth: BelowMobs
+
+- type: entity
+  id: EffectWizardStoppedBullet
+  name: -NR- suspended bullet
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Projectiles/projectiles.rsi
+    state: bolt
+    color: "#C7AEF1"
+    drawdepth: Effects
+
+- type: entity
+  id: EffectWizardStoppedFireball
+  name: -NR- suspended fireball
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Projectiles/magic.rsi
+    state: fireball
+    drawdepth: Effects

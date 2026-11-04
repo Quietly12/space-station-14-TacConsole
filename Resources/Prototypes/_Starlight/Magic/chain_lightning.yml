@@ -1,0 +1,25 @@
+- type: entity
+  parent: BaseEntitySpellAction
+  id: ActionWizardChainLightning
+  name: Chain Lightning
+  description: "Unleash the power of lightning! Strikes a living target for 40 shock damage. Chains to the nearest new target within 3 tiles twice and deals decreased damage. Range: 5"
+  components:
+  - type: Action
+    useDelay: 1
+    itemIconStyle: BigAction
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: repulse }
+    iconColor: "#8CCEFF"
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/lightningbolt.ogg
+  - type: EntityTargetAction
+    event: !type:ChainLightningSpellEvent
+  - type: TargetAction
+    range: 5
+    checkCanAccess: false
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-chain-lightning
+    tts: action-speech-spell-wizard-chain-lightning
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon

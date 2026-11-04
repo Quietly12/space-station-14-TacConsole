@@ -47,7 +47,7 @@
   cost:
     WizCoin: 5 # Starlight: More expensive than usual, back on trial basis.
   categories:
-  - SpellbookOffensive
+  - SpellbookCurses
   conditions:
   - !type:ListingLimitedStockCondition
     stock: 1
@@ -62,7 +62,7 @@
   cost:
     WizCoin: 2
   categories:
-  - SpellbookOffensive
+  - SpellbookCurses
   conditions:
   - !type:ListingLimitedStockCondition
     stock: 1

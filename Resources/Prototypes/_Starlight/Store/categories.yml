@@ -230,6 +230,11 @@
   id: ChangelingAbilityUtility
   name: store-ling-category-utility
   priority: 2
+# Wizard cantrips
+- type: storeCategory
+  id: SpellbookCantrips
+  name: store-category-spellbook-cantrips
+  priority: -1
 
 - type: storeCategory
   id: PollenPerks

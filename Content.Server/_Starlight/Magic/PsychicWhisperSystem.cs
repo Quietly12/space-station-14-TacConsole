@@ -1,14 +1,14 @@
 using Content.Server.Administration;
 using Content.Server.Prayer;
-using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared._Starlight.Magic.Events;
 using Robust.Shared.Player;
+using Robust.Shared.Utility;
 
 namespace Content.Server._Starlight.Magic;
 
 /// <summary>
-///     Implementation for the Elf 'Psychic Whisper' Cantrip
+/// -NR-Sends a private message after the caster finishes the spell's text dialog.
 /// </summary>
 public sealed partial class PsychicWhisperSystem : EntitySystem
 {
@@ -20,43 +20,41 @@ public sealed partial class PsychicWhisperSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<MobStateActionsComponent, PsychicWhisperEvent>(OnPsychicWhisper);
+        SubscribeLocalEvent<PsychicWhisperEvent>(OnPsychicWhisper);
     }
 
-    private void OnPsychicWhisper(EntityUid uid, MobStateActionsComponent component, PsychicWhisperEvent ev)
+    private void OnPsychicWhisper(PsychicWhisperEvent ev)
     {
-        if (!TryComp<ActorComponent>(uid, out var actor))
+        if (ev.Handled || !TryOpenWhisperDialog(ev.Performer, ev.Target, Name(ev.Action)))
             return;
-
-        // is this even valid?
-        if (!TryComp(ev.Performer, out ActorComponent? performerActor))
-            return;
-        if (!TryComp(ev.Target, out ActorComponent? targetActor))
-            return;
-
-        _quickDialog.OpenDialog(performerActor.PlayerSession, Loc.GetString("action-name-psychic-whisper"), "",
-            (string message) =>
-            {
-                // make sure no one died/DC'd while you were typing:
-
-                if (EntityManager.GetComponentOrNull<ActorComponent>(ev.Performer) is not {PlayerSession: var performerPlayerSession} ||
-                    EntityManager.GetComponentOrNull<ActorComponent>(ev.Target) is not {PlayerSession: var targetPlayerSession})
-                {
-                    return;
-                }
-
-                // if a person is gibbed/deleted, no psychic whisper for you!
-                if (Deleted(uid))
-                    return;
-
-                // Intentionally does not check for muteness, must be alive
-                if (actor.PlayerSession.AttachedEntity != uid || !_mobState.IsAlive(uid))
-                    return;
-
-                // _chat.TrySendInGameICMessage(uid, lastWords, InGameICChatType.Whisper, ChatTransmitRange.Normal, checkRadioPrefix: false, ignoreActionBlocker: true);
-                _prayerSystem.SendSubtleMessage(targetPlayerSession, performerPlayerSession, message, Loc.GetString("prayer-popup-subtle-psychic-whisper"));
-            });
 
         ev.Handled = true;
+    }
+
+    public bool TryOpenWhisperDialog(EntityUid performer, EntityUid target, string title = "Telepathy")
+    {
+        if (Deleted(performer) || Deleted(target) ||
+            !TryComp<ActorComponent>(performer, out var performerActor) ||
+            !TryComp<ActorComponent>(target, out var targetActor) ||
+            !_mobState.IsAlive(performer))
+            return false;
+
+        var performerSession = performerActor.PlayerSession;
+        var targetSession = targetActor.PlayerSession;
+        _quickDialog.OpenDialog(performerSession, title, "",
+            (string message) =>
+            {
+                if (string.IsNullOrWhiteSpace(message) || Deleted(performer) || Deleted(target) ||
+                    performerSession.AttachedEntity != performer ||
+                    targetSession.AttachedEntity != target ||
+                    !_mobState.IsAlive(performer))
+                    return;
+
+                _prayerSystem.SendSubtleMessage(targetSession, performerSession,
+                    FormattedMessage.EscapeText(message), Loc.GetString("prayer-popup-subtle-psychic-whisper"),
+                    emphasizeChat: true);
+            });
+
+        return true;
     }
 }

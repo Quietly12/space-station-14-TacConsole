@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "license": "CC-BY-SA-3.0",
+  "copyright": "White recolor for Starlight of the singularity sprite from vgstation13",
+  "source": "https://github.com/vgstation-coders/vgstation13/blob/8eef5a676f66551bd0fb40d506486a6b3b2b0f1a/icons/obj/singularity.dmi",
+  "states": [
+    {
+      "name": "vortex",
+      "directions": 1,
+      "delays": [
+        [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ]
+      ]
+    }
+  ]
+}

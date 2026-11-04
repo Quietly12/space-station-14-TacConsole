@@ -4,6 +4,23 @@ spellbook-staff-healing-description = You don't foresee having to use this in yo
 spellbook-event-summon-cheese-name = Summon Cheese
 spellbook-event-summon-cheese-description = Reach into the void and pluck out... a single piece of cheese!
 
+spellbook-cantrip-summon-duck-name = Summon Duck
+spellbook-cantrip-summon-duck-description = Summons a duck. Quack.
+spellbook-cantrip-summon-bee-name = Summon Bee
+spellbook-cantrip-summon-bee-description = Summons a bee. Bzzz.
+spellbook-cantrip-summon-beer-name = Magical Ale
+spellbook-cantrip-summon-beer-description = A conjured bottle of booze, glows slightly when shaken.
+spellbook-cantrip-telepathy-name = Telepathy
+spellbook-cantrip-telepathy-description = Telapathically send a message directly to someone's mind. Range: 4
+spellbook-cantrip-minor-illusion-name = Minor Illusion
+spellbook-cantrip-minor-illusion-description = Conjure an Illusionary image of a random creature. Range: 4
+spellbook-cantrip-speak-with-dead-name = Speak with Dead
+spellbook-cantrip-speak-with-dead-description = Hear nearby ghosts for 30 seconds. Can be canceled at any time.
+spellbook-cantrip-arcane-chalk-name = Arcane Chalk
+spellbook-cantrip-arcane-chalk-description = Summon magical chalk, writes on anything, about anything!
+spellbook-cantrip-mage-hand-name = Mage Hand
+spellbook-cantrip-mage-hand-description = Control an ethereal hand that can interact with nearby objects.
+
 spellbook-event-tower-babel-name = Language Shift
 spellbook-event-tower-babel-description = Can you Repeat that? Randomizes everything's languages! Has to be cast on station. Disables refunds.
 action-speech-spell-babel = Ya' Ni Lau' Re el
@@ -64,3 +81,5 @@ spellbook-icepillars-desc = Summon a row of somewhat sturdy ice pillars in front
 
 spellbook-eruption-name = Eruption
 spellbook-eruption-desc = Summon a rune that after 2 seconds will start sending fiery shrapnels in a wide area.
+spellbook-wizard-stop-time-name = Stop time
+spellbook-wizard-stop-time-description = Stops time in a 5x5 area for 10 seconds. Only those who know this spell can move.

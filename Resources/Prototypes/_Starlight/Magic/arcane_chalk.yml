@@ -1,0 +1,34 @@
+- type: entity
+  id: WizardArcaneChalkMark
+  name: -NR-glowing chalk symbol
+  description: -NR-A short message glows here.
+  categories: [ HideSpawnMenu, DoNotMap ]
+  components:
+  - type: Clickable
+  - type: WizardArcaneChalkMark
+  - type: Sprite
+    drawdepth: FloorObjects
+    sprite: Fluids/writing.rsi
+    scale: 1.25,1.25
+    color: "#FFBA68DD"
+    layers:
+    - state: writing-1
+      shader: unshaded
+
+- type: entity
+  parent: BaseItem
+  id: WizardArcaneChalk
+  name: arcane chalk
+  description: -NR- One mark. It remains until cleaned.
+  components:
+  - type: Sprite
+    sprite: Objects/Fun/crayons.rsi
+    state: white
+    color: "#99ddff"
+  - type: Item
+    sprite: Objects/Fun/crayons.rsi
+    heldPrefix: white
+    size: Tiny
+  - type: LimitedCharges
+    maxCharges: 1
+  - type: WizardArcaneChalk

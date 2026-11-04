@@ -1,0 +1,471 @@
+- type: listing
+  id: SpellbookWizardFrogCurse
+  name: spellbook-wizard-frog-name
+  description: spellbook-wizard-frog-description
+  productAction: ActionWizardFrogCurse
+  cost:
+    WizCoin: 3
+  categories:
+  - SpellbookCurses
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardInvisibilityCurse
+  name: spellbook-wizard-invisibility-curse-name
+  description: spellbook-wizard-invisibility-curse-description
+  productAction: ActionWizardInvisibilityCurse
+  cost:
+    WizCoin: 2
+  categories: [SpellbookCurses]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardDominateMind
+  name: spellbook-wizard-dominate-mind-name
+  description: spellbook-wizard-dominate-mind-description
+  productAction: ActionWizardDominateMind
+  cost:
+    WizCoin: 6
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardApprenticeshipContract
+  name: spellbook-wizard-apprenticeship-name
+  description: spellbook-wizard-apprenticeship-description
+  productEntity: WizardApprenticeshipContract
+  cost:
+    WizCoin: 4
+  categories: [SpellbookEquipment]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardRandomCurseWand
+  name: spellbook-wizard-random-curse-wand-name
+  description: spellbook-wizard-random-curse-wand-description
+  productEntity: WeaponWandRandomCurses
+  cost:
+    WizCoin: 3
+  categories: [SpellbookEquipment]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardMeteorSwarm
+  name: spellbook-wizard-meteor-swarm-name
+  description: spellbook-wizard-meteor-swarm-description
+  productAction: ActionWizardMeteorSwarm
+  cost:
+    WizCoin: 5
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardStopTime
+  name: spellbook-wizard-stop-time-name
+  description: spellbook-wizard-stop-time-description
+  productAction: ActionWizardStopTime
+  cost:
+    WizCoin: 5
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardAncientCurse
+  name: spellbook-wizard-ancient-name
+  description: spellbook-wizard-ancient-description
+  productAction: ActionWizardAncientCurse
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookCurses
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardMoodsCurse
+  name: spellbook-wizard-moods-name
+  description: spellbook-wizard-moods-description
+  productAction: ActionWizardMoodsCurse
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookCurses
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardDoomCurse
+  name: spellbook-wizard-doom-name
+  description: spellbook-wizard-doom-description
+  productAction: ActionWizardDoomCurse
+  cost:
+    WizCoin: 3
+  categories:
+  - SpellbookCurses
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardSummonBeeSwarm
+  name: spellbook-wizard-summon-bees-name
+  description: spellbook-wizard-summon-bees-description
+  productAction: ActionWizardSummonBeeSwarm
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookOffensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardInteriorRustic
+  name: spellbook-wizard-interior-rustic-name
+  description: spellbook-wizard-interior-rustic-description
+  productAction: ActionWizardInteriorRustic
+  cost:
+    WizCoin: 3
+  categories:
+  - SpellbookDefensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardNewPerspective
+  name: spellbook-wizard-perspective-name
+  description: spellbook-wizard-perspective-description
+  productAction: ActionWizardNewPerspective
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCurses
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardMagicMissile
+  name: spellbook-wizard-missile-name
+  description: spellbook-wizard-missile-description
+  productAction: ActionWizardMagicMissile
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookDefensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardSnailCurse
+  name: spellbook-wizard-snail-name
+  description: spellbook-wizard-snail-description
+  productAction: ActionWizardSnailCurse
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookCurses
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardNoirCurse
+  name: spellbook-wizard-noir-name
+  description: spellbook-wizard-noir-description
+  productAction: ActionWizardNoirCurse
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookCurses
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardMassLocationSwap
+  name: spellbook-wizard-mass-swap-name
+  description: spellbook-wizard-mass-swap-description
+  productAction: ActionWizardMassLocationSwap
+  cost:
+    WizCoin: 3
+  categories:
+  - SpellbookDefensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardStaticElectricity
+  name: spellbook-wizard-static-electricity-name
+  description: spellbook-wizard-static-electricity-description
+  productAction: ActionWizardStaticElectricity
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookCurses
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardLocalizedZeroGravity
+  name: spellbook-wizard-zero-gravity-name
+  description: spellbook-wizard-zero-gravity-description
+  productAction: ActionWizardLocalizedZeroGravity
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookDefensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+- type: listing
+  id: SpellbookWizardTornado
+  name: spellbook-wizard-tornado-name
+  description: spellbook-wizard-tornado-description
+  productAction: ActionWizardTornado
+  cost:
+    WizCoin: 3
+  categories:
+  - SpellbookOffensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardGrease
+  name: spellbook-wizard-grease-name
+  description: spellbook-wizard-grease-description
+  productAction: ActionWizardGrease
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookDefensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardSleepingCloud
+  name: spellbook-wizard-sleeping-cloud-name
+  description: spellbook-wizard-sleeping-cloud-description
+  productAction: ActionWizardSleepingCloud
+  cost: { WizCoin: 2 }
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardCombust
+  name: spellbook-wizard-combust-name
+  description: spellbook-wizard-combust-description
+  productAction: ActionWizardCombust
+  cost: { WizCoin: 2 }
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardMagicalSauna
+  name: spellbook-wizard-magical-sauna-name
+  description: spellbook-wizard-magical-sauna-description
+  productAction: ActionWizardMagicalSauna
+  cost: { WizCoin: 2 }
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardStinkCloud
+  name: spellbook-wizard-stink-cloud-name
+  description: spellbook-wizard-stink-cloud-description
+  productAction: ActionWizardStinkCloud
+  cost: { WizCoin: 2 }
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardTrashGolem
+  name: spellbook-wizard-trash-golem-name
+  description: spellbook-wizard-trash-golem-description
+  productAction: ActionWizardTrashGolem
+  cost: { WizCoin: 3 }
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardAsphyxiate
+  name: spellbook-wizard-asphyxiate-name
+  description: spellbook-wizard-asphyxiate-description
+  productAction: ActionWizardAsphyxiate
+  cost: { WizCoin: 2 }
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardConeOfHellfire
+  name: spellbook-wizard-cone-of-hellfire-name
+  description: spellbook-wizard-cone-of-hellfire-description
+  productAction: ActionWizardConeOfHellfire
+  cost: { WizCoin: 3 }
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardConeOfCold
+  name: spellbook-wizard-cone-of-cold-name
+  description: spellbook-wizard-cone-of-cold-description
+  productAction: ActionWizardConeOfCold
+  cost: { WizCoin: 2 }
+  categories: [SpellbookOffensive]
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardSummonGunStaff
+  name: spellbook-wizard-summon-gun-name
+  description: spellbook-wizard-summon-gun-description
+  productEntity: WeaponStaffSummonGun
+  cost:
+    WizCoin: 3
+  categories:
+  - SpellbookEquipment
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardRandomCreatureWand
+  name: spellbook-wizard-random-creature-wand-name
+  description: spellbook-wizard-random-creature-wand-description
+  productEntity: WeaponWandRandomCreature
+  cost:
+    WizCoin: 3
+  categories:
+  - SpellbookEquipment
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardChainLightning
+  name: spellbook-wizard-chain-lightning-name
+  description: spellbook-wizard-chain-lightning-description
+  productAction: ActionWizardChainLightning
+  cost:
+    WizCoin: 3
+  categories:
+  - SpellbookOffensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardDimensionDoor
+  name: spellbook-wizard-dimension-door-name
+  description: spellbook-wizard-dimension-door-description
+  productAction: ActionWizardDimensionDoor
+  cost:
+    WizCoin: 3
+  categories:
+  - SpellbookUtility
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardArcaneBarrage
+  productUpgradeId: SpellbookWizardArcaneBarrageUpgrade
+  name: spellbook-wizard-arcane-barrage-name
+  description: spellbook-wizard-arcane-barrage-description
+  productAction: ActionWizardArcaneBarrage
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookOffensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardArcaneBarrageUpgrade
+  productUpgradeId: SpellbookWizardArcaneBarrageUpgrade
+  name: spellbook-wizard-arcane-barrage-upgrade-name
+  description: spellbook-wizard-arcane-barrage-upgrade-description
+  icon:
+    sprite: Objects/Magic/magicactions.rsi
+    state: magicmissile
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookOffensive
+  conditions:
+  - !type:BuyBeforeCondition
+    whitelist:
+    - SpellbookWizardArcaneBarrage
+  - !type:ListingLimitedStockCondition
+    stock: 2
+
+- type: listing
+  id: SpellbookWizardLightningBarrage
+  productUpgradeId: SpellbookWizardLightningBarrageUpgrade
+  name: spellbook-wizard-lightning-barrage-name
+  description: spellbook-wizard-lightning-barrage-description
+  productAction: ActionWizardLightningBarrage
+  cost:
+    WizCoin: 2
+  categories:
+  - SpellbookOffensive
+  conditions:
+  - !type:ListingLimitedStockCondition
+    stock: 1
+
+- type: listing
+  id: SpellbookWizardLightningBarrageUpgrade
+  productUpgradeId: SpellbookWizardLightningBarrageUpgrade
+  name: spellbook-wizard-lightning-barrage-upgrade-name
+  description: spellbook-wizard-lightning-barrage-upgrade-description
+  icon:
+    sprite: Structures/Power/Generation/Tesla/energy_miniball.rsi
+    state: tesla_projectile
+  cost:
+    WizCoin: 1
+  categories:
+  - SpellbookOffensive
+  conditions:
+  - !type:BuyBeforeCondition
+    whitelist:
+    - SpellbookWizardLightningBarrage
+  - !type:ListingLimitedStockCondition
+    stock: 2

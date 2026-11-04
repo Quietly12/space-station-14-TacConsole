@@ -1,0 +1,44 @@
+- type: entity
+  id: WizardMinorIllusion
+  name: -NR-illusory creature
+  description: -NR-A creature with an odd shimmer at its edges.
+  categories: [ HideSpawnMenu, DoNotMap ]
+  components:
+  - type: Sprite
+    drawdepth: Mobs
+  - type: WizardMinorIllusion
+  - type: Tag
+    tags:
+    - HideContextMenu
+
+- type: entity
+  id: WizardMinorIllusionPuff
+  name: -NR-illusion smoke
+  categories: [ HideSpawnMenu, DoNotMap ]
+  components:
+  - type: ParticleEmitter
+    effect: WizardMinorIllusionSmoke
+  - type: TimedDespawn
+    lifetime: 1
+  - type: Tag
+    tags:
+    - HideContextMenu
+
+- type: particleEffect
+  id: WizardMinorIllusionSmoke
+  sprite:
+    sprite: Effects/chemsmoke.rsi
+    state: chemsmoke_white
+  startColor: "#DDDDCCAA"
+  endColor: "#DDDDCC00"
+  lifetime: 0.7
+  lifetimeVariance: 0.1
+  speed: 0.35
+  speedVariance: 0.15
+  particleSize: 0.3
+  sizeVariance: 0.1
+  emissionRate: 30
+  maxCount: 20
+  burst: true
+  duration: 0.2
+  gravity: -0.1

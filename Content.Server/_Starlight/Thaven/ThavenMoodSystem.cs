@@ -354,7 +354,8 @@ public sealed partial class ThavenMoodsSystem : SharedThavenMoodSystem
                 TryAddMood(ent, mood, true, false);
         }
 
-        ent.Comp.Action = _actions.AddAction(ent.Owner, _actionViewMoods);
+        if (ent.Comp.Action is null)
+            ent.Comp.Action = _actions.AddAction(ent.Owner, _actionViewMoods);
     }
 
     private void OnThavenMoodShutdown(Entity<ThavenMoodsComponent> ent, ref ComponentShutdown args)

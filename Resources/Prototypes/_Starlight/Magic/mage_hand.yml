@@ -1,0 +1,78 @@
+- type: entity
+  parent: [ Incorporeal, BaseMob ]
+  id: WizardMageHandBody
+  name: -NR-mage hand
+  description: -NR-A small blue hand held aloft by magic.
+  categories: [ HideSpawnMenu, DoNotMap ]
+  components:
+  - type: RemoteControlDirectBody
+  - type: WizardMageHandBody
+  - type: ContentEye
+    maxZoom: 1.44,1.44
+  - type: Eye
+    drawFov: false
+  - type: Input
+    context: "ghost"
+  - type: ActiveInputMover
+  - type: Examiner
+    skipChecks: true
+  - type: Sprite
+    noRot: false
+    drawdepth: Mobs
+    sprite: _ST/Effects/interaction.rsi
+    state: hand
+    color: "#78bfffbb"
+    shader: unshaded
+    scale: 0.9,0.9
+  - type: PointLight
+    radius: 1.25
+    energy: 0.55
+    color: "#78bfff"
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.2
+        density: 5
+        mask:
+        - Impassable
+        layer:
+        - FlyingMobLayer
+  - type: MobState
+    allowedStates: [ Alive, Dead ]
+  - type: Damageable
+    damageContainer: Biological
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      1: Dead
+  - type: Hands
+    activeHandId: Hand
+    hands:
+      Hand:
+        location: Left
+  - type: ComplexInteraction
+  - type: CombatMode
+  - type: MeleeWeapon
+    animation: WeaponArcFist
+    attackRate: 1
+    damage:
+      types:
+        Blunt: 2
+    soundHit:
+      collection: Punch
+
+- type: entity
+  id: WizardMageHandConsole
+  name: -NR-mage hand focus
+  categories: [ HideSpawnMenu, DoNotMap ]
+  components:
+  - type: RemoteControlConsole
+  - type: ActivatableUI
+    key: enum.RemoteControlUIKey.Key
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.RemoteControlUIKey.Key:
+        type: RemoteControlConsoleBoundUserInterface

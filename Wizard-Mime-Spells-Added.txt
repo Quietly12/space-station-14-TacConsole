@@ -1,0 +1,165 @@
+
+Wizard spells
+=============
+
+Frog
+  Curse a target into the form of a frog. Only a hug or damage can cure them. Range: Touch
+
+Curse of Invisibility
+  Curse a target with invisibility until they attack or take damage. Is this even a curse? Range: 5
+
+Dominate Mind
+  Compel an unshielded target to serve and protect you. Can be broken by a mindshield. Range: Touch
+
+Meteor Swarm
+  -NR- Strike a nearby 7x7 tile area with two to four meteors, generally a terrible idea.
+
+Stop time
+  Stops time in a 5x5 area for 10 seconds. Only those who know this spell can move.
+
+Curse of the Ancients
+  Force the burdens of history upon one unlucky soul. They'll be forced to move only in full tiles at a time. Cured by holy water. Range: Touch
+
+Curse of Hysteria
+  Gives the target one random new Thaven mood. Cured by Psicodine. Range: Touch
+
+Curse of Doom
+  Give the target foresight into their own demise, they must complete a task and alter their own timeline in 60 seconds or die. Range: Touch
+
+Summon Bees
+  Summons a swarm of bees, they're angry, they're very angry, what did you expect? Range: Self
+
+Interior Redecorating
+  Channel nature to convert nearby floors, walls, windows, and doors into something a little more organic. Gnome and garden approved! Range: 4
+
+New Perspective
+  Make a target dizzy, twisting their view until they take a moment to sit on a chair and recover. Range: 4
+
+Magic Missile
+  Fire a slow homing orb at every nearby target, hits knock them down temporarily. Range: 4
+
+Curse of the Snail
+  Force a target to crawl like a snail, they'll even leave a slippery trail! Range: 3
+
+Curse of Noir
+  Give a target Noir Vision, forcing them to see the world in black, white and red until they have a drink at the bar. Range: 4
+
+Crowd Swap
+  Shuffle the locations of all nearby living creatures within 5 tiles, who knows where you'll end up!
+
+Static Electricity
+  Curse a target to shock anyone who touches them. Cured by eating insulated gloves. Range: Touch
+
+Gravity Shift
+  Turns off gravity in a localized area, leaving too quickly will cause you to fall flat on your face! Range: Self
+
+Tornado
+  Send forth a vortex of wind to pull and spin everything nearby. Travels in a line.
+
+Grease
+  Spread slippery, flammable welding fuel over a 4x4 area. Range: 5
+
+Sleeping Cloud
+  Releases a gas that puts everyone to sleep! Conjures a magical grenade to your hand.
+
+Combust
+  Releases a gas that quickly detonates explosively. Conjures a magical grenade to your hand.
+
+Magical Sauna
+  Detonates into a sauna of magical steam! Conjures a magical grenade to your hand.
+
+-NR- Stink Cloud
+  -NR- Releases a choking cloud of ammonia. Conjures a magical grenade to your hand.
+
+Trash Golem
+  -NR- Animate up to ten loose items in a 3x3 area centered on you into an obedient golem.
+
+Asphyxiate
+  Consume all oxygen in a 3x3 area for 20 seconds. Range: 5
+
+Cone of Hellfire
+  Release a cone of hellfire, also probably run. Range: 2
+
+Cone of Cold
+  -NR- Freeze targets for four seconds, throw them back, and leave ice in their wake. Deals ten cold damage across an area three tiles long and three tiles wide. Range: 3
+
+Chain Lightning
+  Unleash the power of lightning! Strikes a living target for 40 shock damage. Chains to the nearest new target within 3 tiles twice and deals decreased damage. Range: 5
+
+Dimension Door
+  Create a two way portal to somewhere else, where? Not sure, try it and find out! Remains until cancelled. May have side effects. Range: Touch
+
+Arcane Barrage
+  -NR- Raise 15 homing orbs in groups of three that divide among nearby targets, dealing blunt and stamina damage.
+
+Lightning Barrage
+  -NR- Raise 15 lightning balls in groups of three. Each deals 4 shock damage and can bounce twice between nearby people.
+
+Barrage upgrade tiers
+=====================
+
+Arcane Flurry
+  -NR- Raise 30 homing orbs in groups of three that divide among nearby targets, dealing blunt and stamina damage.
+
+Arcane Storm
+  -NR- Raise 45 homing orbs in groups of three that divide among nearby targets, dealing blunt and stamina damage.
+
+Lightning Flurry
+  -NR- Raise 30 lightning balls in groups of three. Each deals 4 shock damage and can bounce twice between nearby people.
+
+Lightning Storm
+  -NR- Raise 45 lightning balls in groups of three. Each deals 4 shock damage and can bounce twice between nearby people.
+
+Cantrips
+========
+
+Summon Duck
+  -NR-Summon one ordinary duck nearby.
+
+Summon Bee
+  -NR-Summon one non-hostile bee nearby.
+
+Magical Ale
+  A conjured bottle of booze, glows slightly when shaken.
+
+Telepathy
+  Telapathically send a message directly to someone's mind. Range: 4
+
+Minor Illusion
+  Conjure an Illusionary image of a random creature. Range: 4
+
+Speak with Dead
+  Hear nearby ghosts for 30 seconds. Can be canceled at any time.
+
+Mage Hand
+  Control an ethereal hand that can interact with nearby objects.
+
+Arcane Chalk
+  -NR- Summon chalk with one charge. Its writing remains until cleaned.
+
+Mime abilities
+==============
+
+Invisible Barrier
+  Form a 1x3 Invisible barrier behind you for one minute. Great at blocking entire hallways!
+
+Finger Gun
+  Draw or put away your trusty finger gun. Hits Inject a small amount of mute toxin into the target. Recovers 1 bullet every 20 seconds.
+
+Invisible Lasso
+  Throw a lasso at your target, a successful hit knocks them down and drags them back towards you.
+
+Related magic items
+===================
+
+contract of apprenticeship
+  -NR- Bound to the wizard who purchased it. A prospective apprentice can sign with a pen.
+
+wand of random curses
+  Fires a projectile that applies a random curse to anyone hit. Results may vary.
+
+Wand of Random Creatures
+  Summons a random creature who will consider you friendly, good luck to everyone else. Five Charges.
+
+Staff of Many Guns
+  Conjures a random spectral gun that fires in the targeted direction for ten seconds. Results may vary.

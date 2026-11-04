@@ -1,0 +1,59 @@
+- type: entity
+  parent: BaseAction
+  id: ActionWizardConeOfHellfire
+  name: Cone of Hellfire
+  description: "Release a cone of hellfire, also probably run. Range: 2"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: fireball }
+  - type: TargetAction
+    range: 5
+    checkCanAccess: false
+  - type: WorldTargetAction
+    event: !type:ConeOfHellfireSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardConeOfCold
+  name: Cone of Cold
+  description: "Freeze your foes in a gust of magical wind that encases them in ice and pushes them away! Deals 30 cold damage. Range: 3"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: spell_default }
+  - type: TargetAction
+    range: 5
+    checkCanAccess: false
+  - type: WorldTargetAction
+    event: !type:ConeOfColdSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+
+- type: entity
+  id: EffectWizardColdFreeze
+  name: -NR- frozen shell
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: Structures/Walls/ice.rsi
+    state: full
+    scale: 1.25,1.25
+    color: "#A8DFFF99"
+    drawdepth: OverMobs
+  - type: Transform
+    noRot: true

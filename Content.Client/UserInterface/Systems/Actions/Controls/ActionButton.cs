@@ -96,6 +96,8 @@ public sealed partial class ActionButton : Control, IEntityControl
             Visible = false,
         };
         _bigActionIcon.DisplayRect.Stretch = StretchMode.Scale; // Starlight-edit: Animated Actions
+        // TextureRect's Scale stretch uses its arranged size. Keep it at the full action slot.
+        _bigActionIcon.DisplayRect.SetSize = new Vector2(64, 64);
         _smallActionIcon = new AnimatedTextureRect // Starlight-edit: Animated Actions
         {
             HorizontalAlignment = HAlignment.Right,
@@ -157,6 +159,7 @@ public sealed partial class ActionButton : Control, IEntityControl
         AddChild(Label);
         AddChild(Cooldown);
         AddChild(paddingBoxItemIcon);
+        InitializeMimeAmmo();
 
         Button.Modulate = new Color(255, 255, 255, 150);
 
@@ -308,6 +311,7 @@ public sealed partial class ActionButton : Control, IEntityControl
         }
 
         SetActionIcon(icon != null ? icon : null); // Starlight-edit: Animated actions
+        UpdateMimeGunActiveIcon();
     }
 
     public void UpdateBackground()
@@ -360,6 +364,7 @@ public sealed partial class ActionButton : Control, IEntityControl
         base.FrameUpdate(args);
 
         UpdateBackground();
+        UpdateMimeAmmo(args.DeltaSeconds);
 
         Cooldown.Visible = Action?.Comp.Cooldown != null;
         if (Action?.Comp is not {} action)
@@ -457,4 +462,8 @@ public sealed partial class ActionButton : Control, IEntityControl
     }
 
     EntityUid? IEntityControl.UiEntity => Action;
+
+    private partial void InitializeMimeAmmo();
+    private partial void UpdateMimeAmmo(float deltaSeconds);
+    private partial void UpdateMimeGunActiveIcon();
 }

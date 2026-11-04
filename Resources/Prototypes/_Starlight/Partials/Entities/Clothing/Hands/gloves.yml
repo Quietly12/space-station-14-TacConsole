@@ -3,3 +3,28 @@
   components:
   - type: StainBlocker
     slots: [GLOVES]
+
+- type: !PartialOnly entity
+  id: ClothingHandsGlovesColorYellow
+  components:
+  - type: StaticElectricityCurativeGlove
+
+- type: !PartialOnly entity
+  id: ClothingHandsGlovesColorYellowBudget
+  components:
+  - type: StaticElectricityCurativeGlove
+
+- type: !PartialOnly entity
+  id: ClothingHandsGlovesFingerlessInsulated
+  components:
+  - type: StaticElectricityCurativeGlove
+
+- type: !PartialOnly entity
+  id: ClothingHandsGlovesFingerlessBudget
+  components:
+  - type: StaticElectricityCurativeGlove
+
+- type: !PartialOnly entity
+  id: ClothingHandsGlovesInsulatedChameleon
+  components:
+  - type: StaticElectricityCurativeGlove

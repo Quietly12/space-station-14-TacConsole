@@ -38,6 +38,7 @@ using Robust.Shared.Random;
 using Content.Shared._Starlight.Combat.Ranged.Pierce;
 using Content.Shared._Starlight.Weapons.Hitscan.Events;
 using Content.Shared.Mobs.Components;
+using Content.Shared._Starlight.Magic.Components;
 
 namespace Content.Client.Weapons.Ranged.Systems;
 
@@ -552,7 +553,7 @@ public sealed partial class GunSystem : SharedGunSystem
                     Recoil(user, direction, gun.Comp.CameraRecoilScalarModified);
                     fired = true; // Starlight
                     // Starlight-start
-                    if (ent != null)
+                    if (ent != null && !HasComp<WizardStopTimeAwareComponent>(user))
                         PredictHitscan(gun, ent.Value, GetHitscanSeed(gun, ammoIndex, 0), fromMap, mapDirection.Normalized(), (toMap - fromMap.Position).Length(), user);
                     // Starlight-end
                     break;

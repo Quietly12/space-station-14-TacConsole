@@ -43,6 +43,7 @@ using Content.Shared._Starlight.Language.Systems;
 using Content.Shared.Humanoid;
 using Content.Shared._Starlight.Radio;
 using Content.Server._Starlight.TextToSpeech;
+using Content.Server.Magic;
 using Content.Shared._Starlight.Humanoid.IgnoreHumanoids;
 using Content.Shared._Starlight.CCVar;
 // Starlight End
@@ -814,6 +815,8 @@ public sealed partial class ChatSystem : SharedChatSystem
         }
 
         _chatManager.ChatMessageToMany(ChatChannel.Dead, message, wrappedMessage, source, hideChat, true, clients.ToList(), author: player.UserId);
+        if (!hideChat && HasComp<GhostComponent>(source) && !_adminManager.IsAdmin(player))
+            RaiseLocalEvent(new WizardGhostSpeechEvent(source, message));
     }
     #endregion
 

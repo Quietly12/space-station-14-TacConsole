@@ -1,5 +1,6 @@
 using System.Numerics;
 using Content.Server.Cargo.Systems;
+using Content.Server.Magic;
 using Content.Server.Weapons.Ranged.Components;
 using Content.Shared.Cargo;
 using Content.Shared.Damage;
@@ -32,6 +33,7 @@ public sealed partial class GunSystem : SharedGunSystem
 #region Starlight
     [Dependency] private TransformSystem _transform = default!;
     [Dependency] private INetConfigurationManager _netConfig = default!;
+    [Dependency] private MagicSystem _stopTimeMagic = default!;
 
     private bool PredictsHitscans(ICommonSession session)
         => _netConfig.GetClientCVar(session.Channel, StarlightCCVars.HitscanPrediction);
@@ -156,9 +158,11 @@ public sealed partial class GunSystem : SharedGunSystem
                         Target = gun.Comp.Target,
                         PredictionSeed = GetHitscanSeed(gun, ammoIndex, 0), // Starlight
                     };
-                    RaiseLocalEvent(ent.Value, ref hitscanEv);
-
-                    Del(ent);
+                    if (!_stopTimeMagic.TrySuspendHitscanShot(ent.Value, ref hitscanEv))
+                    {
+                        RaiseLocalEvent(ent.Value, ref hitscanEv);
+                        Del(ent);
+                    }
 
                     Audio.PlayPredicted(gun.Comp.SoundGunshotModified, gun, user);
                     fired = true; // Starlight
@@ -261,9 +265,11 @@ public sealed partial class GunSystem : SharedGunSystem
                 Target = gun.Comp.Target,
                 PredictionSeed = predictionSeed,
             };
-            RaiseLocalEvent(uid, ref hitscanEv);
-
-            Del(uid);
+            if (!_stopTimeMagic.TrySuspendHitscanShot(uid, ref hitscanEv))
+            {
+                RaiseLocalEvent(uid, ref hitscanEv);
+                Del(uid);
+            }
             return;
         }
         // Starlight end - cartridges can hold hitscans
@@ -277,7 +283,9 @@ public sealed partial class GunSystem : SharedGunSystem
             return;
         }
 
-        ShootProjectile(uid, mapDirection, gunVelocity, gun, user, gun.Comp.ProjectileSpeedModified);
+        if (!_stopTimeMagic.TrySuspendGunProjectile(uid, gun, user, mapDirection, gunVelocity,
+                gun.Comp.ProjectileSpeedModified))
+            ShootProjectile(uid, mapDirection, gunVelocity, gun, user, gun.Comp.ProjectileSpeedModified);
     }
 
     // Starlight-start: Fully rework recoil

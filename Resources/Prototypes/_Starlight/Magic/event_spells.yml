@@ -7,7 +7,7 @@
   - type: Magic
     requiresClothes: false
   - type: Action
-    useDelay: 15
+    useDelay: 1
     itemIconStyle: BigAction
     icon:
       sprite: Objects/Consumable/Food/ingredients.rsi
@@ -15,6 +15,162 @@
   - type: InstantAction
     event: !type:SpawnItemInHandEvent
       spawned: FoodCheeseSlice
+      castSound: !type:SoundCollectionSpecifier
+        collection: MagicRetroCantrip
+
+- type: entity
+  parent: BaseAction
+  id: ActionSummonDuck
+  name: Summon Duck
+  description: -NR-Summon one ordinary duck nearby.
+  components:
+  - type: Magic
+    requiresClothes: false
+  - type: Action
+    useDelay: 1
+    itemIconStyle: BigAction
+    icon:
+      sprite: Mobs/Animals/duck.rsi
+      state: duck-0
+  - type: InstantAction
+    event: !type:InstantSpawnSpellEvent
+      prototype: MobDuckMallard
+      castSound: !type:SoundCollectionSpecifier
+        collection: MagicRetroCantrip
+
+- type: entity
+  parent: BaseAction
+  id: ActionSummonBee
+  name: Summon Bee
+  description: -NR-Summon one non-hostile bee nearby.
+  components:
+  - type: Magic
+    requiresClothes: false
+  - type: Action
+    useDelay: 1
+    itemIconStyle: BigAction
+    icon:
+      sprite: Mobs/Animals/bee.rsi
+      state: 0
+  - type: InstantAction
+    event: !type:InstantSpawnSpellEvent
+      prototype: MobBee
+      castSound: !type:SoundCollectionSpecifier
+        collection: MagicRetroCantrip
+
+- type: entity
+  parent: BaseAction
+  id: ActionSummonBeer
+  name: Magical Ale
+  description: A conjured bottle of booze, glows slightly when shaken.
+  components:
+  - type: Magic
+    requiresClothes: false
+  - type: Action
+    useDelay: 1
+    itemIconStyle: BigAction
+    icon:
+      sprite: Objects/Consumable/Drinks/pwinebottle.rsi
+      state: icon
+  - type: InstantAction
+    event: !type:SpawnItemInHandEvent
+      spawned: DrinkMagicalAleBottle
+      castSound: !type:SoundCollectionSpecifier
+        collection: MagicRetroCantrip
+
+- type: entity
+  parent: ActionCantripMessage
+  id: ActionWizardTelepathy
+  name: Telepathy
+  description: "Telapathically send a message directly to someone's mind. Range: 4"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+  - type: TargetAction
+    range: 4
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardMinorIllusion
+  name: Minor Illusion
+  description: "Conjure an Illusionary image of a random creature. Range: 4"
+  components:
+  - type: Magic
+    requiresClothes: false
+  - type: Action
+    useDelay: 1
+    itemIconStyle: BigAction
+    icon: { sprite: Mobs/Animals/mouse.rsi, state: mouse-0 }
+  - type: TargetAction
+    range: 4
+  - type: WorldTargetAction
+    event: !type:MinorIllusionSpellEvent
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardSpeakWithDead
+  name: Speak with Dead
+  description: Hear nearby ghosts for 30 seconds. Can be canceled at any time.
+  components:
+  - type: Magic
+    requiresClothes: false
+    requiresSpeech: true
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: Mobs/Ghosts/ghost_human.rsi, state: animated }
+  - type: InstantAction
+    event: !type:SpeakWithDeadSpellEvent
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardMageHand
+  name: Mage Hand
+  description: Control an ethereal hand that can interact with nearby objects.
+  components:
+  - type: Magic
+    requiresClothes: false
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: _ST/Effects/interaction.rsi, state: hand }
+  - type: InstantAction
+    event: !type:ToggleMageHandSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardMageHandReturn
+  name: -NR-Return from Mage Hand
+  description: -NR-Release the flying hand and return to your body.
+  components:
+  - type: WizardFullSizeIcon
+  - type: Action
+    itemIconStyle: BigAction
+    icon: { sprite: _ST/Effects/interaction.rsi, state: hand }
+  - type: InstantAction
+    event: !type:ReturnMageHandSpellEvent
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardArcaneChalk
+  name: Arcane Chalk
+  description: Summon magical chalk, writes on anything, about anything!
+  components:
+  - type: Magic
+    requiresClothes: false
+  - type: Action
+    useDelay: 1
+    itemIconStyle: BigAction
+    icon: { sprite: Objects/Fun/crayons.rsi, state: white }
+  - type: InstantAction
+    event: !type:ArcaneChalkSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
 
 - type: entity
   parent: BaseAction

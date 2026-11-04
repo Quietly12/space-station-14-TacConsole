@@ -256,6 +256,7 @@ public sealed partial class StoreSystem
         if (listing.ProductEntity != null)
         {
             var product = Spawn(listing.ProductEntity, Transform(buyer).Coordinates);
+            RaiseLocalEvent(product, new StorePurchasedListingEvent(buyer, listing, product, null));
             LinkPurchasedRemotes(uid, product);
             _hands.PickupOrDrop(buyer, product);
 
@@ -373,6 +374,7 @@ public sealed partial class StoreSystem
             $"{ToPrettyString(buyer):player} purchased listing \"{resolvedName}\" from {ToPrettyString(uid)}{logExtraInfo}."); // Starlight
 
         listing.PurchaseAmount++; //track how many times something has been purchased
+        RefreshWizardCantripDiscounts(component);
         var soundTarget = msg.SoundSource is { } soundSource ? GetEntity(soundSource) : uid;
         _audio.PlayEntity(component.BuySuccessSound, msg.Actor, soundTarget); //cha-ching!
 

@@ -1,5 +1,6 @@
 using Content.Shared.Actions;
 using Content.Shared.Damage;
+using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._Starlight.Magic.Events;
@@ -23,6 +24,9 @@ public sealed partial class SpawnItemInHandEvent : InstantActionEvent
     /// </summary>
     [DataField]
     public bool RequiresFreeHand = false;
+
+    [DataField]
+    public SoundSpecifier? CastSound;
 }
 
 /// <summary>

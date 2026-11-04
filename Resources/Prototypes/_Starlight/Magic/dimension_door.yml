@@ -1,0 +1,71 @@
+- type: entity
+  parent: BaseAction
+  id: ActionWizardDimensionDoor
+  name: Dimension Door
+  description: "Create a two way portal to somewhere else, where? Not sure, try it and find out! Remains until cancelled. May have side effects. Range: Touch"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: blink }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/teleport_diss.ogg
+  - type: TargetAction
+    range: 1.5
+    checkCanAccess: false
+  - type: WorldTargetAction
+    event: !type:DimensionDoorSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+  - type: Item
+    itemIconStyle: BigAction
+
+- type: entity
+  parent: PortalBlue
+  id: WizardDimensionDoorEntrance
+  name: dimension door
+  description: -NR- A door through space.
+  categories: [ HideSpawnMenu, DoNotMap ]
+  components:
+  - type: Portal
+    randomTeleport: false
+
+- type: entity
+  parent: PortalRed
+  id: WizardDimensionDoorExit
+  name: dimension door
+  description: -NR- A door through space.
+  categories: [ HideSpawnMenu, DoNotMap ]
+  components:
+  - type: Portal
+    randomTeleport: false
+
+- type: entity
+  id: WizardDimensionDoorFlicker
+  name: -NR- dimension door flicker
+  categories: [ HideSpawnMenu, DoNotMap ]
+  components:
+  - type: ParticleEmitter
+    effect: WizardDimensionDoorCollapseParticles
+  - type: TimedDespawn
+    lifetime: 0.5
+
+- type: particleEffect
+  id: WizardDimensionDoorCollapseParticles
+  sprite:
+    sprite: Effects/chemsmoke.rsi
+    state: chemsmoke_white
+  startColor: "#A8C8FF88"
+  endColor: "#A8C8FF00"
+  lifetime: 0.4
+  speed: 0.25
+  particleSize: 0.2
+  emissionRate: 16
+  maxCount: 8
+  burst: true
+  duration: 0.1

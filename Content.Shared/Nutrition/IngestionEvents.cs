@@ -9,6 +9,9 @@ using Robust.Shared.Serialization;
 
 namespace Content.Shared.Nutrition;
 
+[ByRefEvent]
+public readonly record struct IngestedByUserEvent(EntityUid Food);
+
 /// <summary>
 /// Raised on an entity that is trying to be ingested to see if it has universal blockers preventing it from being
 /// ingested.

@@ -1,0 +1,11 @@
+- type: listing
+  id: UplinkBookForbiddenMimeMagic
+  name: uplink-book-forbidden-mime-magic-name
+  description: uplink-book-forbidden-mime-magic-desc
+  productEntity: BookForbiddenMimeMagic
+  cost:
+    Telecrystal: 12
+  categories: [UplinkJob]
+  conditions:
+  - !type:BuyerJobCondition
+    whitelist: [Mime]

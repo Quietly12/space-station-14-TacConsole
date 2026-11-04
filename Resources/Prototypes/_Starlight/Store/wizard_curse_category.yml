@@ -1,0 +1,4 @@
+- type: storeCategory
+  id: SpellbookCurses
+  name: store-category-spellbook-curses
+  priority: 2

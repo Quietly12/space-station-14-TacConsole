@@ -1,0 +1,12 @@
+light_mode unshaded;
+
+uniform highp vec3 tint;
+uniform highp float alpha;
+uniform highp float texHeight;
+uniform highp float t;
+
+void fragment() {
+    highp vec4 base = texture2D(TEXTURE, UV);
+    highp float shimmer = 0.03 + 0.045 * (0.5 + 0.5 * sin((UV.y + t) * texHeight * 6.2831853));
+    COLOR = vec4(mix(base.rgb, base.rgb * tint, shimmer), base.a * alpha);
+}

@@ -5,6 +5,7 @@ using Content.Client.Resources;
 using Content.Client.Stylesheets;
 using Content.Client.Weapons.Ranged.Components;
 using Content.Client.Weapons.Ranged.ItemStatus;
+using Content.Shared._Starlight.Magic.Mime;
 using Robust.Client.Animations;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
@@ -37,7 +38,7 @@ public sealed partial class GunSystem
         RaiseLocalEvent(ent, ev, false);
 
         // Fallback to default if none specified
-        ev.Control ??= new DefaultStatusControl();
+        ev.Control ??= new DefaultStatusControl(HasComp<MimeFingerGunItemComponent>(ent));
 
         ent.Comp.Control = ev.Control;
         UpdateAmmoCount(ent);
@@ -91,7 +92,7 @@ public sealed partial class GunSystem
     {
         private readonly BulletRender _bulletRender;
 
-        public DefaultStatusControl()
+        public DefaultStatusControl(bool whiteBullets = false)
         {
             MinHeight = 15;
             HorizontalExpand = true;
@@ -101,6 +102,11 @@ public sealed partial class GunSystem
                 HorizontalAlignment = HAlignment.Right,
                 VerticalAlignment = VAlignment.Bottom
             });
+            if (whiteBullets)
+            {
+                _bulletRender.LoadedColorA = Color.White;
+                _bulletRender.LoadedColorB = Color.White;
+            }
         }
 
         public void Update(int count, int capacity)

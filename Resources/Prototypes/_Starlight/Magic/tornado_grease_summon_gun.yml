@@ -1,0 +1,185 @@
+- type: entity
+  parent: BaseAction
+  id: ActionWizardTornado
+  name: Tornado
+  description: Send forth a vortex of wind to pull and spin everything nearby. Travels in a line.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: _Starlight/Interface/Actions/WizardPainterly/air-burst-sky-1-upward.png
+    sound: !type:SoundPathSpecifier
+      path: /Audio/_Starlight/Magic/repulse.ogg
+  - type: TargetAction
+    range: 8
+    checkCanAccess: false
+  - type: WorldTargetAction
+    event: !type:TornadoSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+  - type: Item
+    itemIconStyle: BigAction
+
+- type: entity
+  parent: BaseAction
+  id: ActionWizardGrease
+  name: Grease
+  description: "Spread slippery, flammable welding fuel over a 4x4 area. Range: 5"
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 1
+    icon: { sprite: Objects/Magic/magicactions.rsi, state: spell_default }
+    sound: !type:SoundPathSpecifier
+      path: /Audio/Magic/forcewall.ogg
+  - type: TargetAction
+    range: 5
+    checkCanAccess: false
+  - type: WorldTargetAction
+    event: !type:GreaseSpellEvent
+  - type: SpeakOnAction
+    sentence: action-speech-spell-wizard-undecided
+    tts: action-speech-spell-wizard-undecided
+    modifier: Spell
+  - type: Magic
+    requiresClothes: true
+  - type: WizardFullSizeIcon
+  - type: Item
+    itemIconStyle: BigAction
+
+- type: entity
+  id: EffectWizardTornado
+  name: -NR- tornado
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: _Starlight/Effects/wizard_tornado.rsi
+    state: vortex
+    drawdepth: Effects
+  - type: SingularityDistortion
+    intensity: 40
+    falloffPower: 1.5
+  - type: TimedDespawn
+    lifetime: 7.5
+
+- type: entity
+  parent: WeaponStaffBase
+  id: WeaponStaffSummonGun
+  name: Staff of Many Guns
+  description: Conjures a random spectral gun that fires in the targeted direction for ten seconds. Results may vary.
+  components:
+  - type: Sprite
+    layers:
+    - state: chaos
+  - type: Gun
+    fireRate: 1
+    projectileSpeed: 5
+    soundGunshot: null
+    selectedMode: SemiAuto
+    availableModes: [SemiAuto]
+  - type: BasicEntityAmmoProvider
+    proto: ProjectileWizardGunTrigger
+    capacity: 7
+    count: 7
+  - type: RechargeBasicEntityAmmo
+    rechargeCooldown: 20
+    rechargeSound: null
+  - type: Tag
+    tags:
+    - WizardWand
+  - type: WizardSummonGunStaff
+
+- type: entity
+  parent: BaseBullet
+  id: ProjectileWizardGunTrigger
+  name: -NR- summon gun trigger
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    visible: false
+  - type: Projectile
+    impactEffect: null
+    damage:
+      types:
+        Blunt: 0
+  - type: TimedDespawn
+    lifetime: 0.1
+
+- type: entity
+  id: EffectWizardSpectralRevolver
+  name: -NR- spectral revolver
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: _Starlight/Objects/Weapons/Guns/Revolvers/forged_revolver.rsi
+    state: icon
+    color: "#A8E8FFE6"
+    drawdepth: Effects
+  - type: TimedDespawn
+    lifetime: 10
+
+- type: entity
+  parent: EffectWizardSpectralRevolver
+  id: EffectWizardSpectralMosin
+  name: -NR- spectral Mosin
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Snipers/bolt_gun_wood.rsi
+    state: base
+
+- type: entity
+  parent: EffectWizardSpectralRevolver
+  id: EffectWizardSpectralRifle
+  name: -NR- spectral rifle
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Rifles/lecter.rsi
+    state: base
+
+- type: entity
+  parent: EffectWizardSpectralRevolver
+  id: EffectWizardSpectralSmg
+  name: -NR- spectral SMG
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/SMGs/atreides.rsi
+    state: base
+
+- type: entity
+  parent: BaseBullet
+  id: ProjectileWizardSpectralBullet
+  name: -NR- spectral bullet
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Projectiles/projectiles2.rsi
+    layers:
+    - state: sp
+      color: "#9B7DFF"
+      shader: unshaded
+    drawdepth: Effects
+  - type: Projectile
+    ignoreShooter: false
+    damage:
+      types:
+        Piercing: 5
+  - type: TimedDespawn
+    lifetime: 0.6
+
+- type: entity
+  id: EffectWizardSpectralMuzzle
+  name: -NR- spectral muzzle flash
+  categories: [HideSpawnMenu, DoNotMap]
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Projectiles/projectiles.rsi
+    state: muzzle_bullet
+    color: "#9B7DFF"
+    drawdepth: Effects
+  - type: TimedDespawn
+    lifetime: 0.12

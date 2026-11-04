@@ -176,8 +176,8 @@ public sealed class BulletRender : BaseBulletRenderer
         MinCountPerRow = MinCountPerRow
     };
 
-    private static readonly Color ColorA = Color.FromHex("#b68f0e");
-    private static readonly Color ColorB = Color.FromHex("#d7df60");
+    public Color LoadedColorA { get; set; } = Color.FromHex("#b68f0e");
+    public Color LoadedColorB { get; set; } = Color.FromHex("#d7df60");
     private static readonly Color ColorGoneA = Color.FromHex("#000000");
     private static readonly Color ColorGoneB = Color.FromHex("#222222");
 
@@ -220,7 +220,7 @@ public sealed class BulletRender : BaseBulletRenderer
         if (spent)
             color = altColor ? ColorGoneA : ColorGoneB;
         else
-            color = altColor ? ColorA : ColorB;
+            color = altColor ? LoadedColorA : LoadedColorB;
 
         var texture = _type == BulletType.Tiny ? _bulletTiny : _bulletNormal;
         handle.DrawTexture(texture, renderPos, color);

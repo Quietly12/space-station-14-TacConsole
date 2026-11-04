@@ -23,6 +23,13 @@ public sealed partial class MagicSystem : SharedMagicSystem
     public override void Initialize()
     {
         base.Initialize();
+        InitializeStarlightWizardSpells();
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        UpdateStarlightWizardSpells(frameTime);
     }
 
     public override void OnVoidApplause(VoidApplauseSpellEvent ev)

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "State based copyright",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "lasso",
+      "copyright": "Edited from the /tg/station whip by Rescue for Starlight"
+    },
+    {
+      "name": "barrier",
+      "copyright": "By Rescue for Starlight"
+    },
+    {
+      "name": "finger_gun",
+      "copyright": "By Rescue for Starlight"
+    }
+  ]
+}
