@@ -19,7 +19,8 @@ What this branch contains
 -------------------------
 The synthetic test, a bounded in-memory recorder, timing scopes, these
 instructions, and an opt-out for the harness's existing event-timing detours.
-It contains no pipe/cable optimizations and no real-map or forced-link tests.
+It also includes explicitly selected stock-map docking diagnostics.
+It contains no pipe/cable optimizations or forced-link tests.
 It is based on Starlight revision c562be44c4. Record the full commit of the
 benchmark you actually run. Upstream SS14 needs adaptation: this fixture uses
 Starlight's cable/pipe docking systems and configuration variables.
@@ -158,3 +159,91 @@ These measurements do not describe total frame time, FPS, player-visible latency
 or a populated live server. Older quoted timings are not expected pass/fail
 values. Hardware and runtime changes affect absolute numbers. This is baseline
 profiling only; no before/after or speedup claim should be made from this branch.
+
+STOCK-MAP DOCKING TESTS
+======================
+
+StockMapDockingProfileTest loads the original Reach, Ming and Flotilla maps and
+/Maps/_Starlight/Shuttles/Cargo/cargo_downpour.yml. No map files are edited and
+no forced links are created. The fixture aligns the shuttle, then calls the real
+DockingSystem.Dock/Undock methods. It does not test piloting or approach/collision
+validation. Maps remain UNPAUSED throughout the test.
+
+Use the same agent-assisted workflow, Release build and environment settings as
+above. The separate cycle setting for map tests defaults to six:
+  $env:REAL_MAP_CYCLES = "6"
+
+Each map has four explicitly selected cases:
+  Both     - HV power and pipes may connect across the dock.
+  Power    - Only HV power may connect.
+  Pipes    - Only pipes may connect, if the mapped port offers them.
+  Neither  - Docking still occurs, but neither utility may connect.
+MV and LV docking stay disabled in every case. These controls only change the
+cross-dock connections; ordinary power and atmosphere simulation still run.
+
+Run one map at a time (each command selects its four utility cases):
+  dotnet run --project Content.IntegrationTests -c Release --no-build -- --filter "FullyQualifiedName~StockMapDockingProfileTest.ProfileReach" --show-stdout All --progress off
+  dotnet run --project Content.IntegrationTests -c Release --no-build -- --filter "FullyQualifiedName~StockMapDockingProfileTest.ProfileMing" --show-stdout All --progress off
+  dotnet run --project Content.IntegrationTests -c Release --no-build -- --filter "FullyQualifiedName~StockMapDockingProfileTest.ProfileFlotilla" --show-stdout All --progress off
+
+Or select all twelve cases:
+  dotnet run --project Content.IntegrationTests -c Release --no-build -- --filter "FullyQualifiedName~StockMapDockingProfileTest" --show-stdout All --progress off
+
+Repeat the chosen command in a fresh process for performance reporting. Keep
+separate logs and require all selected cases to pass with zero skips/failures.
+Two runs at the default six cycles yield 12 measurements per direction/mode/map.
+REAL_MAP_CYCLES=1 is useful only for a smoke check, not a performance conclusion.
+Allow several minutes for the full suite; do not run cases concurrently.
+
+Pinned mapped ports (station-local coordinates)
+----------------------------------------------
+Reach:    (-21.5,   7.5)
+Ming:     (-27.5, -90.5)
+Flotilla: (-77.5,  11.5)
+Downpour: (  3.5,  -0.5), identical shuttle port in every case.
+
+The tests require one compatible power link at each selected port. Reach and
+Flotilla must offer four compatible pipe links; Ming must offer zero. A changed
+map should fail these expectations instead of silently testing another port.
+
+IMPORTANT: these maps do not provide equivalent pipe workloads:
+- Ming has NO mapped pipe connection at the selected dock. Its Pipes case is a
+  no-pipe-link control. A zero rebuild cost does not show fast pipe rebuilding.
+- Reach connects to small isolated pipe groups at passive gates, not its mains.
+- Flotilla connects directly to two large station pipe groups, plus small ones.
+Use the recorded group sizes to interpret results. Do not present a map-to-map
+ratio as an algorithmic speedup or assume every pipe/wire on the map is rebuilt.
+
+Artifacts and checks
+--------------------
+Each case attaches stock-map-dock-<map>-<mode>-<unique>.csv and matching JSON.
+The JSON records the actual ports, mode, seed, pause state, runtime, available
+link counts, active link counts, and group sizes. availableGroups includes every
+network the mapped ports could join; affectedGroups includes only networks whose
+utility is enabled for that case. Ming is explicitly flagged and prints a
+NO PIPE CONNECTION message. Node counts are not whole-map entity counts.
+
+Checks require enabled links to merge and split correctly, disabled links to
+remain separate, original group membership to be preserved, and no unrelated
+nodes to join or disappear. These run after transitions and idle intervals.
+The recorder must not overflow and network updating must not be paused.
+The original configuration is restored and each loaded map is deleted afterward.
+
+Use the same CSV per-cycle aggregation described above, grouping additionally by
+map and mode. A missing rebuild phase in a no-link control means zero rebuild
+work only when that case completed successfully. Do not compare a partial or
+failed artifact. Inspect idle windows for background rebuilds and record any.
+Do not add nested scope times or assume independently measured medians sum to
+the both-enabled result. Gas simulation, full server tick time and client-visible
+lag are not measured by these synchronous network-rebuild scopes.
+
+Suggested map-test request to your agent
+---------------------------------------
+"Read DockingNetworkProfile.txt and run StockMapDockingProfileTest on the clean
+Tests/DockingTest branch, with no network fixes. Run the desired map's four
+utility modes twice, unpaused, at six measured cycles. Verify every case passes,
+compare recorded network sizes and ports across runs, preserve CSV/JSON and logs,
+and report pooled rebuild and phase medians, allocations, ranges and individual
+run medians. Clearly distinguish Ming's missing pipe links and Reach's isolated
+pipe groups from Flotilla's main networks. Stop on changed connection expectations
+rather than adding forced links or weakening checks."
