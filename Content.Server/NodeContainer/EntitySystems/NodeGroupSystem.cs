@@ -35,6 +35,9 @@ namespace Content.Server.NodeContainer.EntitySystems
         private readonly HashSet<Node> _toRemove = new();
         private readonly List<Node> _toReflood = new();
 
+        /// <summary>Optional synchronous benchmark recorder; null in normal play.</summary>
+        public NetworkConnectionProfiler? ConnectionProfiler { get; set; }
+
         private ISawmill _sawmill = default!;
 
         private const float VisDataUpdateInterval = 1;
@@ -164,29 +167,33 @@ namespace Content.Server.NodeContainer.EntitySystems
             if (_toRemake.Count == 0 && _toReflood.Count == 0 && _toRemove.Count == 0)
                 return;
 
+            using var totalProfile = ConnectionProfiler?.Measure("rebuild.total", _toReflood.Count);
             var sw = Stopwatch.StartNew();
 
             var xformQuery = GetEntityQuery<TransformComponent>();
             var nodeQuery = GetEntityQuery<NodeContainerComponent>();
 
-            foreach (var toRemove in _toRemove)
+            using (ConnectionProfiler?.Measure("rebuild.removals"))
             {
-                if (toRemove.NodeGroup == null)
-                    continue;
+                foreach (var toRemove in _toRemove)
+                {
+                    if (toRemove.NodeGroup == null)
+                        continue;
 
-                var group = (BaseNodeGroup) toRemove.NodeGroup;
+                    var group = (BaseNodeGroup) toRemove.NodeGroup;
 
-                group.RemoveNode(toRemove);
-                toRemove.NodeGroup = null;
+                    group.RemoveNode(toRemove);
+                    toRemove.NodeGroup = null;
 
-                QueueRemakeGroup(group);
-            }
+                    QueueRemakeGroup(group);
+                }
 
-            // Break up all remaking groups.
-            // Don't clear the list yet, we'll come back to these later.
-            foreach (var toRemake in _toRemake)
-            {
-                QueueRemakeGroup(toRemake);
+                // Break up all remaking groups.
+                // Don't clear the list yet, we'll come back to these later.
+                foreach (var toRemake in _toRemake)
+                {
+                    QueueRemakeGroup(toRemake);
+                }
             }
 
             _gen += 1;
@@ -196,71 +203,80 @@ namespace Content.Server.NodeContainer.EntitySystems
             // i.e. node A may return B, but B may not return A.
             //
             // Must be for loop to allow concurrent modification from RemakeGroupImmediate.
-            for (var i = 0; i < _toReflood.Count; i++)
+            using (ConnectionProfiler?.Measure("rebuild.adjacency"))
             {
-                var node = _toReflood[i];
-
-                if (node.Deleting)
-                    continue;
-
-                ClearReachableIfNecessary(node);
-
-                if (node.NodeGroup?.Remaking == false)
+                for (var i = 0; i < _toReflood.Count; i++)
                 {
-                    QueueRemakeGroup((BaseNodeGroup) node.NodeGroup);
-                }
+                    var node = _toReflood[i];
 
-                // GetCompatibleNodes will involve getting the transform & grid as most connection requirements are
-                // based on position & anchored neighbours However, here more than one node could be attached to the
-                // same parent. So there is probably a better way of doing this.
+                    if (node.Deleting)
+                        continue;
 
-                foreach (var compatible in GetCompatibleNodes(node, xformQuery, nodeQuery))
-                {
-                    ClearReachableIfNecessary(compatible);
+                    ClearReachableIfNecessary(node);
 
-                    if (compatible.NodeGroup?.Remaking == false)
+                    if (node.NodeGroup?.Remaking == false)
                     {
-                        // We are expanding into an existing group,
-                        // remake it so that we can treat it uniformly.
-                        var group = (BaseNodeGroup) compatible.NodeGroup;
-                        QueueRemakeGroup(group);
+                        QueueRemakeGroup((BaseNodeGroup) node.NodeGroup);
                     }
 
-                    node.ReachableNodes.Add(compatible);
-                    compatible.ReachableNodes.Add(node);
+                    // GetCompatibleNodes will involve getting the transform & grid as most connection requirements are
+                    // based on position & anchored neighbours However, here more than one node could be attached to the
+                    // same parent. So there is probably a better way of doing this.
+
+                    foreach (var compatible in GetCompatibleNodes(node, xformQuery, nodeQuery))
+                    {
+                        ClearReachableIfNecessary(compatible);
+
+                        if (compatible.NodeGroup?.Remaking == false)
+                        {
+                            // We are expanding into an existing group,
+                            // remake it so that we can treat it uniformly.
+                            var group = (BaseNodeGroup) compatible.NodeGroup;
+                            QueueRemakeGroup(group);
+                        }
+
+                        node.ReachableNodes.Add(compatible);
+                        compatible.ReachableNodes.Add(node);
+                    }
                 }
             }
 
             var newGroups = new List<BaseNodeGroup>();
 
             // Flood fill over nodes. Every node will only be flood filled once.
-            foreach (var node in _toReflood)
+            using (ConnectionProfiler?.Measure("rebuild.flood-and-init"))
             {
-                node.FlaggedForFlood = false;
+                foreach (var node in _toReflood)
+                {
+                    node.FlaggedForFlood = false;
 
-                // Check if already flood filled.
-                if (node.FloodGen == _gen || node.Deleting)
-                    continue;
+                    // Check if already flood filled.
+                    if (node.FloodGen == _gen || node.Deleting)
+                        continue;
 
-                // Flood fill
-                var groupNodes = FloodFillNode(node);
+                    // Flood fill
+                    var groupNodes = FloodFillNode(node);
 
-                var newGroup = InitGroup(node, groupNodes);
-                newGroups.Add(newGroup);
+                    var newGroup = InitGroup(node, groupNodes);
+                    newGroups.Add(newGroup);
+                }
             }
 
             // Go over dead groups that need to be cleaned up.
             // Tell them to push their data to new groups too.
-            foreach (var oldGroup in _toRemake)
+            using (ConnectionProfiler?.Measure("rebuild.redistribute"))
             {
-                // Group by the NEW group.
-                var newGrouped = oldGroup.Nodes.GroupBy(n => n.NodeGroup);
+                foreach (var oldGroup in _toRemake)
+                {
+                    // Group by the NEW group.
+                    var newGrouped = oldGroup.Nodes.GroupBy(n => n.NodeGroup);
 
-                oldGroup.Removed = true;
-                oldGroup.AfterRemake(newGrouped);
-                _nodeGroups.Remove(oldGroup);
-                if (VisEnabled)
-                    _visDeletes.Add(oldGroup.NetId);
+                    oldGroup.Removed = true;
+                    oldGroup.AfterRemake(newGrouped);
+                    _nodeGroups.Remove(oldGroup);
+                    if (VisEnabled)
+                        _visDeletes.Add(oldGroup.NetId);
+                }
             }
 
             var refloodCount = _toReflood.Count;
@@ -270,19 +286,22 @@ namespace Content.Server.NodeContainer.EntitySystems
             _toRemove.Clear();
 
             // notify entities that node groups have been updated, so they can do things like update their visuals.
-            HashSet<EntityUid> entities = new();
-            foreach (var group in newGroups)
+            using (ConnectionProfiler?.Measure("rebuild.notifications"))
             {
-                foreach (var node in group.Nodes)
+                HashSet<EntityUid> entities = new();
+                foreach (var group in newGroups)
                 {
-                    entities.Add(node.Owner);
+                    foreach (var node in group.Nodes)
+                    {
+                        entities.Add(node.Owner);
+                    }
                 }
-            }
 
-            foreach (var uid in entities)
-            {
-                var ev = new NodeGroupsRebuilt(uid);
-                RaiseLocalEvent(uid, ref ev, true);
+                foreach (var uid in entities)
+                {
+                    var ev = new NodeGroupsRebuilt(uid);
+                    RaiseLocalEvent(uid, ref ev, true);
+                }
             }
 
             _sawmill.Debug($"Updated node groups in {sw.Elapsed.TotalMilliseconds}ms. {newGroups.Count} new groups, {refloodCount} nodes processed.");
@@ -299,6 +318,7 @@ namespace Content.Server.NodeContainer.EntitySystems
 
         private BaseNodeGroup InitGroup(Node node, List<Node> groupNodes)
         {
+            using var profile = ConnectionProfiler?.Measure(node.NodeGroupID == NodeGroupID.Pipe ? "group.init.pipe" : "group.init.other", groupNodes.Count);
             var newGroup = (BaseNodeGroup) _nodeGroupFactory.MakeNodeGroup(node.NodeGroupID);
             newGroup.Initialize(node, EntityManager);
             newGroup.NetId = _groupNetIdCounter++;
@@ -323,6 +343,7 @@ namespace Content.Server.NodeContainer.EntitySystems
         private List<Node> FloodFillNode(Node rootNode)
         {
             // All nodes we're filling into that currently have NO network.
+            using var profile = ConnectionProfiler?.Measure("group.flood");
             var allNodes = new List<Node>();
 
             var stack = new Stack<Node>();

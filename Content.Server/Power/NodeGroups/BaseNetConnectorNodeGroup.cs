@@ -1,3 +1,4 @@
+using Content.Server.NodeContainer.EntitySystems;
 using Content.Server.NodeContainer.NodeGroups;
 using Content.Server.Power.Components;
 using Content.Shared.NodeContainer;
@@ -17,6 +18,7 @@ namespace Content.Server.Power.NodeGroups
 
         public override void LoadNodes(List<Node> groupNodes)
         {
+            using var profile = EntMan.System<NodeGroupSystem>().ConnectionProfiler?.Measure("power.load-connectors", groupNodes.Count);
             base.LoadNodes(groupNodes);
 
             foreach (var node in groupNodes)

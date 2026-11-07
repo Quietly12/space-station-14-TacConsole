@@ -25,6 +25,10 @@ internal static class EventTimingSummaryPatch
 
     internal static void Apply()
     {
+        // Profiling runs opt out before any event dispatch detours are installed.
+        if (Environment.GetEnvironmentVariable("SS14_TEST_DISABLE_EVENT_TIMING") == "1")
+            return;
+
         if (Interlocked.Exchange(ref s_applied, 1) != 0)
             return;
 

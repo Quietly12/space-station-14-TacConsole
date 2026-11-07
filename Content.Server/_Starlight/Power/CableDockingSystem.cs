@@ -57,6 +57,7 @@ public sealed partial class CableDockingSystem : EntitySystem
 
     private void OnDocked(DockEvent ev)
     {
+        using var profile = _nodeGroupSystem.ConnectionProfiler?.Measure("dock.cable.OnDocked");
         GetDockCableNodes(ev.DockA, _dockACables);
         GetDockCableNodes(ev.DockB, _dockBCables);
 
@@ -74,6 +75,7 @@ public sealed partial class CableDockingSystem : EntitySystem
 
     private void OnUndocked(UndockEvent ev)
     {
+        using var profile = _nodeGroupSystem.ConnectionProfiler?.Measure("dock.cable.OnUndocked");
         GetDockCableNodes(ev.DockA, _dockACables);
         GetDockCableNodes(ev.DockB, _dockBCables);
 

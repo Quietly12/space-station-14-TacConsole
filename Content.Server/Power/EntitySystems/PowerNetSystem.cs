@@ -21,6 +21,7 @@ namespace Content.Server.Power.EntitySystems
     [UsedImplicitly]
     public sealed partial class PowerNetSystem : SharedPowerNetSystem
     {
+        [Dependency] private NodeGroupSystem _nodeGroups = default!;
         [Dependency] private AppearanceSystem _appearance = default!;
         [Dependency] private PowerNetConnectorSystem _powerNetConnector = default!;
         [Dependency] private IConfigurationManager _cfg = default!;
@@ -297,13 +298,16 @@ namespace Content.Server.Power.EntitySystems
             _ticksSinceSolve = 0;
             // Starlight-end
 
-            ReconnectNetworks();
+            using var totalProfile = _nodeGroups.ConnectionProfiler?.Measure("power.update");
+            using (_nodeGroups.ConnectionProfiler?.Measure("power.reconnect"))
+                ReconnectNetworks();
 
             // Synchronize batteries
             RaiseLocalEvent(new NetworkBatteryPreSync());
 
             // Run power solver.
-            _solver.Tick(frameTime, _powerState, _parMan);
+            using (_nodeGroups.ConnectionProfiler?.Measure("power.solver"))
+                _solver.Tick(frameTime, _powerState, _parMan);
 
             // Synchronize batteries, the other way around.
             RaiseLocalEvent(new NetworkBatteryPostSync());

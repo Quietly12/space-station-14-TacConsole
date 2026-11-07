@@ -1,0 +1,160 @@
+BASELINE DOCKING NETWORK BENCHMARK
+=================================
+
+Use a coding agent to run and interpret this developer diagnostic.
+This is not a standalone executable or a live-server load test.
+
+Suggested request to your agent
+------------------------------
+"Run the baseline docking benchmark on Tests/DockingTest. Read
+Content.IntegrationTests/Tests/Shuttle/DockingNetworkProfile.txt first.
+Check that this checkout contains the test and instrumentation only, with no
+network performance fixes. Run the small correctness matrix, then run the
+64x64 cable-and-pipe benchmark twice in separate processes with eight measured
+cycles each. Preserve both logs and CSV attachments. Report pooled per-cycle
+medians, allocations, ranges, revision, runtime and hardware. Stop and explain
+any failed checks or required source changes; do not silently weaken assertions."
+
+What this branch contains
+-------------------------
+The synthetic test, a bounded in-memory recorder, timing scopes, these
+instructions, and an opt-out for the harness's existing event-timing detours.
+It contains no pipe/cable optimizations and no real-map or forced-link tests.
+It is based on Starlight revision c562be44c4. Record the full commit of the
+benchmark you actually run. Upstream SS14 needs adaptation: this fixture uses
+Starlight's cable/pipe docking systems and configuration variables.
+
+Use a separate clean checkout/worktree. Do not copy archived source snapshots
+over your own files. If porting to another revision, review every instrumentation
+change and confirm the underlying network algorithms remain stock. Passing
+correctness assertions and checking the diff are required; an agent alone does
+not guarantee that the results are valid.
+
+Setup and correctness check (PowerShell, repository root)
+--------------------------------------------------------
+Use the repository's required .NET SDK and initialized submodules. Record:
+  git rev-parse HEAD
+  git status --short
+  git submodule status --recursive
+  dotnet --info
+
+If submodules are not initialized:
+  git submodule update --init --recursive
+
+In a dedicated PowerShell session, set these BEFORE starting a test process:
+  $env:SS14_TEST_DISABLE_EVENT_TIMING = "1"
+  $env:DOTNET_TieredCompilation = "0"
+  $env:DOCK_PROFILE_SIZE = "64"
+  $env:DOCK_PROFILE_CYCLES = "8"
+
+Build (restores packages as needed):
+  dotnet build Content.IntegrationTests -c Release -p:TreatWarningsAsErrors=false
+
+The warnings override accommodates existing repository warnings. Check that the
+build actually succeeds; do not proceed after an error.
+
+Run the four small correctness cases: both connections, cable only, pipe only,
+and neither. These use 4x4 grids and short intervals:
+  dotnet run --project Content.IntegrationTests -c Release --no-build -- --filter "FullyQualifiedName~DockingNetworkProfileTest.SmallNetworksMergeAndSplit" --show-stdout All --progress off
+
+Require all four cases to pass. A skipped/dirty-disposed test is not a pass.
+
+Run the large baseline twice
+----------------------------
+The large method has ONLY the both-enabled test case, so this filter runs one
+benchmark, not the four-case control matrix. Run it alone, with no other tests,
+builds or heavy workloads running at the same time.
+
+  dotnet run --project Content.IntegrationTests -c Release --no-build -- --filter "FullyQualifiedName~DockingNetworkProfileTest.ProfileLargeNetworks" --show-stdout All --progress off > docking-baseline-1.log 2>&1
+
+Check the exit code ($LASTEXITCODE), require one passed test and zero failures or
+skips, and preserve the CSV attachment printed in the log. Then repeat in a NEW
+process (a second invocation of the command):
+
+  dotnet run --project Content.IntegrationTests -c Release --no-build -- --filter "FullyQualifiedName~DockingNetworkProfileTest.ProfileLargeNetworks" --show-stdout All --progress off > docking-baseline-2.log 2>&1
+
+Again require one passed test and preserve the attached CSV. Each filename has a
+unique suffix. Do not combine results from controls, failed tests, different
+builds, different grid sizes, or different hardware. Closing the dedicated shell
+clears these environment overrides. If reusing it, restore its previous values.
+
+Workload and assertions
+-----------------------
+Two generated 64x64 grids, each containing 4,096 HV cables, 4,096 four-way pipes,
+one supplier, 63 consumers and one real shuttle airlock. No map files or manual
+piloting are needed. Ports start aligned; DockingSystem.Dock/Undock execute real
+docking events and joint handling. Pipe connections use normal docking logic.
+The grids are UNPAUSED. The dense lattice is deliberately stressful and is not
+a representative station layout. There are no power-monitoring consoles or
+gas-consuming devices. Nitrogen checks gas conservation across merges/splits.
+
+Each state lasts 60 SIMULATED seconds, not 60 wall-clock seconds. Normal server
+ticks advance without sleeping; the fixture does not force network updates.
+One warmup dock/undock cycle is discarded per process, followed by eight retained
+cycles. Two processes give 16 samples per direction. Defaults can be changed
+with DOCK_PROFILE_SIZE (4..128) and DOCK_PROFILE_CYCLES (1..50).
+
+Assertions verify docking state, full expected network sizes, correct merge/split
+state, conserved gas, no profiler overflow, and unpaused simulation. Checks run
+after transitions and at the end of idle intervals. Connection must complete
+within the three-tick measurement window. Do not remove assertions to get timings.
+
+Reporting results
+-----------------
+CSV columns contain cycle, window, phase, start timestamp, elapsed Stopwatch
+ticks, allocated bytes on the server thread, item count, and window GC counters.
+The output includes Stopwatch frequency and runtime settings. Preserve logs and
+raw CSV files, not just a screenshot of the summary.
+
+For each direction and phase, SUM durations/bytes within each measured cycle
+first, then pool those per-cycle totals across the two runs. Compute the median
+of the resulting 16 samples (average the two middle values for an even count).
+Convert Stopwatch ticks to milliseconds using the frequency printed in the log.
+Do not average the two run medians. The console summary describes individual
+scopes, so use CSV aggregation if a window contains multiple rebuilds.
+
+Report median elapsed time for:
+  operation.total          -> Dock/undock call itself
+  rebuild.total            -> Entire network rebuild
+  rebuild.adjacency        -> Adjacency reconstruction
+  rebuild.notifications    -> Rebuild notifications
+  power.load-connectors    -> Power-connector loading
+Also report median allocated bytes, sample counts, min/max, and any repeated
+rebuilds or rebuilds in idle windows. With 16 samples, tail percentiles are weak
+evidence. Retain GC-affected samples rather than silently discarding them.
+
+Scope hierarchy and limits
+--------------------------
+Scopes are INCLUSIVE. Never add a parent and its children together:
+  operation.total
+    dock.cable.OnDocked / OnUndocked
+    dock.pipe.OnDocked / OnUndocked
+  rebuild.total
+    rebuild.removals
+    rebuild.adjacency
+    rebuild.flood-and-init
+      group.flood
+      group.init.pipe / group.init.other
+        power.load-connectors
+    rebuild.redistribute
+    rebuild.notifications
+  power.update
+    power.reconnect
+    power.solver
+
+power.update covers a solve/update when the existing power tick interval allows
+one; skipped ticks remain skipped. Instrumentation does not change that interval.
+The measured transition window covers the call and the next three server ticks;
+an idle window covers the last three ticks before the next transition. Other
+ticks execute normally but are not recorded.
+
+Stopwatch measures wall time including scheduling pauses and GC, not exclusive
+CPU time. Allocations exclude worker threads. GC counters are process-wide and
+repeated on each row in a window: do not sum them across rows. The recorder is
+preallocated; formatting happens after the timed scopes. Instrumentation still
+has overhead. A disconnected client instance exists in the harness.
+
+These measurements do not describe total frame time, FPS, player-visible latency,
+or a populated live server. Older quoted timings are not expected pass/fail
+values. Hardware and runtime changes affect absolute numbers. This is baseline
+profiling only; no before/after or speedup claim should be made from this branch.

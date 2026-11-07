@@ -50,6 +50,7 @@ public sealed partial class PipeDockingSystem : EntitySystem
 
     private void OnDocked(DockEvent ev)
     {
+        using var profile = _nodeGroupSystem.ConnectionProfiler?.Measure("dock.pipe.OnDocked");
         if (!DockPipes)
             return;
 
@@ -70,6 +71,7 @@ public sealed partial class PipeDockingSystem : EntitySystem
 
     private void OnUndocked(UndockEvent ev)
     {
+        using var profile = _nodeGroupSystem.ConnectionProfiler?.Measure("dock.pipe.OnUndocked");
         GetDockConnectingPipes(ev.DockA, _dockAPipes, includeDisabled: true);
         GetDockConnectingPipes(ev.DockB, _dockBPipes, includeDisabled: true);
 
