@@ -172,7 +172,7 @@ namespace Content.Shared.Interaction
 
             var slottedPAI = IsSlottedPAI(ev.Actor, ev.Target);  // Starlight-edit: PAI's can be slotted into and use console BUIs.
 
-            if (!_actionBlockerSystem.CanInteract(ev.Actor, ev.Target) && !slottedPAI) // Starlight-edit: PAI's can be slotted into and use console BUIs.
+            if (!_actionBlockerSystem.CanInteract(ev.Actor, ev.Target) && !slottedPAI && !IsObserverRadarSync(ev)) // Starlight-edit: PAI's can be slotted into and use console BUIs. Ghosts can use their own mass scanner UI.
             {
                 // We permit ghosts to open uis unless explicitly blocked
                 if (ev.Message is not OpenBoundInterfaceMessage
