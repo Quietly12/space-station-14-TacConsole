@@ -31,7 +31,17 @@ public sealed partial class RadarConsoleBoundUserInterface : BoundUserInterface
 
         _window = this.CreatePopOutableWindow<RadarConsoleWindow>(EntMan); // Starlight: popout
         _window.RadarClicked += OnRadarClicked; // Starlight: go to location for AI
+        if (!EntMan.IsClientSide(Owner)) // Replay observers generate their radar state locally.
+            SendMessage(new RadarConsoleRequestStateMessage());
     }
+
+    protected override void ReceiveMessage(BoundUserInterfaceMessage message)
+    {
+        base.ReceiveMessage(message);
+        if (message is RadarConsoleUpdateMessage update)
+            UpdateState(update.State);
+    }
+
     protected override void UpdateState(BoundUserInterfaceState state)
     {
         base.UpdateState(state);

@@ -94,7 +94,7 @@ public sealed partial class RadarDockingStateSystem : EntitySystem
         RemoveConsoleState(entity.Owner);
     }
 
-    private void RemoveConsoleState(EntityUid console)
+    internal void RemoveConsoleState(EntityUid console)
     {
         _lastDockingPortStateVersions.Remove(console);
         _pendingDockingPortStateVersions.Remove(console);

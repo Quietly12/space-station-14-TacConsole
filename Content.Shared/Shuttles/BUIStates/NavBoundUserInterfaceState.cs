@@ -18,3 +18,14 @@ public sealed class NavBoundUserInterfaceState : BoundUserInterfaceState
         DockingPortStates = dockingPortStates; // Starlight
     }
 }
+
+/// <summary>Live radar data sent only to players viewing this interface.</summary>
+[Serializable, NetSerializable]
+public sealed class RadarConsoleUpdateMessage(NavBoundUserInterfaceState state) : BoundUserInterfaceMessage
+{
+    public NavBoundUserInterfaceState State = state;
+}
+
+/// <summary>Requests the initial snapshot after the client radar window is ready.</summary>
+[Serializable, NetSerializable]
+public sealed class RadarConsoleRequestStateMessage : BoundUserInterfaceMessage;

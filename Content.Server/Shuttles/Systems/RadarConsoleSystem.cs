@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Numerics;
 // _Starlight
 using Content.Shared.Shuttles.BUIStates;
@@ -6,6 +7,7 @@ using Content.Shared.Shuttles.Systems;
 using Robust.Server.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Timing;
+using Robust.Shared.Player;
 using Content.Server._Starlight.Shuttles.Systems;
 using Content.Shared._Starlight.Shuttles.Components;
 using Content.Server._Starlight.Shuttles.Components; // _Starlight
@@ -37,17 +39,12 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
     /// </summary>
     private static readonly TimeSpan _activeUpdateInterval = TimeSpan.FromMilliseconds(250);
 
-    /// <summary>
-    /// How often to transmit UI updates when nobody is actively looking at a console. This makes it so that the
-    /// consoles show a slightly outdated state initially when opened, rather than just a blank screen.
-    /// </summary>
-    private static readonly TimeSpan _idleUpdateInterval = TimeSpan.FromSeconds(10);
     #endregion
 
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<RadarConsoleComponent, ComponentStartup>(OnRadarStartup);
+        SubscribeLocalEvent<RadarConsoleComponent, RadarConsoleRequestStateMessage>(OnRequestState);
         SubscribeLocalEvent<RadarConsoleComponent, CrewMonitoringWarpRequestMessage>(OnWarpRequest); // Starlight
     }
     #region Starlight
@@ -88,13 +85,20 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
         }
     }
 
-    private void OnRadarStartup(EntityUid uid, RadarConsoleComponent component, ComponentStartup args)
+    private void OnRequestState(EntityUid uid, RadarConsoleComponent component, RadarConsoleRequestStateMessage args)
     {
+        // The client window is ready now; a previous viewer may already have acknowledged the cached snapshot.
+        _radarDockingStateSystem.RemoveConsoleState(uid);
+        component.LastInterfaceUpdateTime = _timing.CurTime - _activeUpdateInterval - TimeSpan.FromTicks(1);
         UpdateState(uid, component);
     }
 
     protected override void UpdateState(EntityUid uid, RadarConsoleComponent component)
     {
+        // Only connected viewers need live radar data. Detached UI actors must not keep updates running.
+        if (!_uiSystem.GetActors(uid, RadarConsoleUiKey.Key).Any(actor => HasComp<ActorComponent>(actor)))
+            return;
+
         var xform = Transform(uid);
         var onGrid = xform.ParentUid == xform.GridUid;
         EntityCoordinates? coordinates = onGrid ? xform.Coordinates : null;
@@ -107,10 +111,9 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
         }
 
         // Starlight BEGIN
-        var shouldIdleUpdate = component.LastInterfaceUpdateTime + _idleUpdateInterval < _timing.CurTime;
         var shouldActiveUpdate = component.LastInterfaceUpdateTime + _activeUpdateInterval < _timing.CurTime &&
                                  _uiSystem.IsUiOpen(uid, RadarConsoleUiKey.Key);
-        if (_uiSystem.HasUi(uid, RadarConsoleUiKey.Key) && (shouldIdleUpdate || shouldActiveUpdate))
+        if (shouldActiveUpdate)
         {
             component.LastInterfaceUpdateTime = _timing.CurTime;
             // Starlight END
@@ -165,7 +168,9 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
                 }
             }
 
-            _uiSystem.SetUiState(uid, RadarConsoleUiKey.Key, new NavBoundUserInterfaceState(state, docks)); // Starlight: +docks
+            // UI component states are replicated to non-viewers in PVS. Keep radar payloads viewer-only.
+            _uiSystem.ServerSendUiMessage(uid, RadarConsoleUiKey.Key,
+                new RadarConsoleUpdateMessage(new NavBoundUserInterfaceState(state, docks)));
         }
     }
 }
