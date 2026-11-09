@@ -42,7 +42,6 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
     public override void Initialize()
     {
         base.Initialize();
-        InitializeRadarUpdates(); // Starlight-edit: on-demand radar updates instead of broadcast.
         SubscribeLocalEvent<RadarConsoleComponent, CrewMonitoringWarpRequestMessage>(OnWarpRequest); // Starlight
     }
     #region Starlight

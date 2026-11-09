@@ -14,15 +14,11 @@ public sealed partial class RadarConsoleSystem
     private readonly Dictionary<(EntityUid Scanner, EntityUid Viewer), (TimeSpan NextUpdate, bool Pending)> _radarRequests = new();
     private readonly List<(EntityUid Scanner, EntityUid Viewer)> _readyRadarRequests = new();
 
-    private void InitializeRadarUpdates()
-    {
-        SubscribeLocalEvent<RadarConsoleComponent, RadarConsoleRequestStateMessage>(OnRequestState);
-    }
-
     /// <summary>
     /// Previous UI had 250ms refresh rate that prevented abuse. Replicated behavior.
     /// The first request is immediate; repeats within 250 ms share one deferred refresh.
     /// </summary>
+    [SubscribeLocalEvent]
     private void OnRequestState(EntityUid uid, RadarConsoleComponent component, RadarConsoleRequestStateMessage args)
     {
         var key = (uid, args.Actor);
