@@ -31,7 +31,9 @@ public sealed partial class RadarConsoleBoundUserInterface : BoundUserInterface
 
         _window = this.CreatePopOutableWindow<RadarConsoleWindow>(EntMan); // Starlight: popout
         _window.RadarClicked += OnRadarClicked; // Starlight: go to location for AI
+        RequestRadarState(); // Starlight
     }
+
     protected override void UpdateState(BoundUserInterfaceState state)
     {
         base.UpdateState(state);

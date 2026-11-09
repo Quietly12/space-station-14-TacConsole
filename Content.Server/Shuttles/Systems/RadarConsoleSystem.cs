@@ -37,17 +37,11 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
     /// </summary>
     private static readonly TimeSpan _activeUpdateInterval = TimeSpan.FromMilliseconds(250);
 
-    /// <summary>
-    /// How often to transmit UI updates when nobody is actively looking at a console. This makes it so that the
-    /// consoles show a slightly outdated state initially when opened, rather than just a blank screen.
-    /// </summary>
-    private static readonly TimeSpan _idleUpdateInterval = TimeSpan.FromSeconds(10);
     #endregion
 
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<RadarConsoleComponent, ComponentStartup>(OnRadarStartup);
         SubscribeLocalEvent<RadarConsoleComponent, CrewMonitoringWarpRequestMessage>(OnWarpRequest); // Starlight
     }
     #region Starlight
@@ -73,6 +67,7 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
     public override void Update(float frameTime) // _Starlight
     {
         base.Update(frameTime);
+        UpdateRadarRequests();
         _blipUpdateTimer += frameTime;
         if (_blipUpdateTimer >= BlipUpdateInterval)
         {
@@ -88,13 +83,11 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
         }
     }
 
-    private void OnRadarStartup(EntityUid uid, RadarConsoleComponent component, ComponentStartup args)
-    {
-        UpdateState(uid, component);
-    }
-
     protected override void UpdateState(EntityUid uid, RadarConsoleComponent component)
     {
+        if (!HasRadarViewers(uid)) // Starlight
+            return;
+
         var xform = Transform(uid);
         var onGrid = xform.ParentUid == xform.GridUid;
         EntityCoordinates? coordinates = onGrid ? xform.Coordinates : null;
@@ -107,10 +100,9 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
         }
 
         // Starlight BEGIN
-        var shouldIdleUpdate = component.LastInterfaceUpdateTime + _idleUpdateInterval < _timing.CurTime;
         var shouldActiveUpdate = component.LastInterfaceUpdateTime + _activeUpdateInterval < _timing.CurTime &&
                                  _uiSystem.IsUiOpen(uid, RadarConsoleUiKey.Key);
-        if (_uiSystem.HasUi(uid, RadarConsoleUiKey.Key) && (shouldIdleUpdate || shouldActiveUpdate))
+        if (shouldActiveUpdate)
         {
             component.LastInterfaceUpdateTime = _timing.CurTime;
             // Starlight END
@@ -165,7 +157,7 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
                 }
             }
 
-            _uiSystem.SetUiState(uid, RadarConsoleUiKey.Key, new NavBoundUserInterfaceState(state, docks)); // Starlight: +docks
+            SendRadarState(uid, state, docks); // Starlight: +docks. Send only to viewers instead of replicating to nearby players.
         }
     }
 }
